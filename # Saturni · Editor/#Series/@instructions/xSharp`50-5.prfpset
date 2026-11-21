@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PremiereData Version="3">
+	<Tree ObjectRef="1"/>
+	<Tree ObjectID="1" ClassID="177f2841-dd5b-43bd-9d9a-79e231bd47dd" Version="1">
+		<Node Version="1">
+		</Node>
+		<RootBin ObjectRef="2"/>
+	</Tree>
+	<BinTreeItem ObjectID="2" ClassID="5e0f46fa-384f-4c09-bc53-0b8e2b7005b5" Version="4">
+		<TreeItemBase Version="4">
+			<Name>Root</Name>
+			<Node Version="1">
+			</Node>
+			<Locked>false</Locked>
+		</TreeItemBase>
+		<Items Version="1">
+			<Item Index="0" ObjectRef="3"/>
+		</Items>
+		<Expanded>false</Expanded>
+		<Sorted>false</Sorted>
+	</BinTreeItem>
+	<BinTreeItem ObjectID="3" ClassID="5e0f46fa-384f-4c09-bc53-0b8e2b7005b5" Version="4">
+		<TreeItemBase Version="4">
+			<Name>#Series</Name>
+			<Node Version="1">
+				<Properties Version="1">
+					<HandlerEffects.EffectItemTree.PresetsBin>1</HandlerEffects.EffectItemTree.PresetsBin>
+				</Properties>
+			</Node>
+			<Data ObjectRef="4"/>
+			<Locked>false</Locked>
+		</TreeItemBase>
+		<Items Version="1">
+			<Item Index="0" ObjectRef="5"/>
+		</Items>
+		<Expanded>true</Expanded>
+		<Sorted>true</Sorted>
+	</BinTreeItem>
+	<EffectBinItem ObjectID="4" ClassID="5f513d71-0018-4405-a10b-bf5597f99960" Version="1">
+		<Flavor>1</Flavor>
+	</EffectBinItem>
+	<TreeItem ObjectID="5" ClassID="025f59ac-1f29-42c0-9897-ada1059bd547" Version="3">
+		<TreeItemBase Version="4">
+			<Name>#Sharp`50-5</Name>
+			<Node Version="1">
+				<Properties Version="1">
+					<MZ.EffectPresets.PresetUID>5196d479-223d-4f32-8423-6f15c4f72d67</MZ.EffectPresets.PresetUID>
+				</Properties>
+			</Node>
+			<Data ObjectRef="6"/>
+			<Locked>false</Locked>
+		</TreeItemBase>
+	</TreeItem>
+	<FilterPresetItem ObjectID="6" ClassID="e56c9ba0-91cb-4f21-9174-c1b52448c6c9" Version="2">
+		<FilterPresets Version="1">
+			<FilterPreset Index="0" ObjectRef="7"/>
+		</FilterPresets>
+		<EffectItem Version="1">
+			<EffectFlavor>5</EffectFlavor>
+			<EffectIsShorcut>false</EffectIsShorcut>
+		</EffectItem>
+	</FilterPresetItem>
+	<FilterPreset ObjectID="7" ClassID="ee52a7d2-069e-47f7-aa30-e3e3286b65a3" Version="3">
+		<Component ObjectRef="8"/>
+		<MediaType>228cda18-3625-4d2d-951e-348879e4ed93</MediaType>
+		<Node Version="1">
+		</Node>
+		<Description></Description>
+		<Type>0</Type>
+		<FilterMatchName>AE.ADBE Unsharp Mask</FilterMatchName>
+		<AnchorInPoint>67722411729795</AnchorInPoint>
+		<AnchorOutPoint>68638901457797</AnchorOutPoint>
+		<Speed>1.100000000000000088817842</Speed>
+		<TransitionDuration>0</TransitionDuration>
+	</FilterPreset>
+	<VideoFilterComponent ObjectID="8" ClassID="d10da199-beea-4dd1-b941-ed3a78766d50" Version="9">
+		<Component Version="7">
+			<Node Version="1">
+			</Node>
+			<DisplayName>Unsharp Mask</DisplayName>
+			<Params Version="1">
+				<Param Index="0" ObjectRef="9"/>
+				<Param Index="1" ObjectRef="10"/>
+				<Param Index="2" ObjectRef="11"/>
+				<Param Index="3" ObjectRef="12"/>
+			</Params>
+			<InstanceName></InstanceName>
+		</Component>
+		<MatchName>AE.ADBE Unsharp Mask</MatchName>
+		<VideoFilterType>2</VideoFilterType>
+	</VideoFilterComponent>
+	<VideoComponentParam ObjectID="9" ClassID="cc12343e-f113-4d3b-ae05-b287db77d461" Version="10">
+		<Node Version="1">
+		</Node>
+		<ParameterControlType>4</ParameterControlType>
+		<Keyframes></Keyframes>
+		<IsTimeVarying>false</IsTimeVarying>
+		<IsLocked>false</IsLocked>
+		<DiscontinuousInterpolate>false</DiscontinuousInterpolate>
+		<StartKeyframe>-91445760000000000,false,0,0,0,0,0,0</StartKeyframe>
+		<CurrentValue>false</CurrentValue>
+		<LowerBound>false</LowerBound>
+		<UpperBound>true</UpperBound>
+		<ParameterID>4</ParameterID>
+		<UnitsString></UnitsString>
+	</VideoComponentParam>
+	<VideoComponentParam ObjectID="10" ClassID="fe47129e-6c94-4fc0-95d5-c056a517aaf3" Version="10">
+		<Name>Amount</Name>
+		<Node Version="1">
+		</Node>
+		<ParameterControlType>2</ParameterControlType>
+		<Keyframes></Keyframes>
+		<IsTimeVarying>false</IsTimeVarying>
+		<IsLocked>false</IsLocked>
+		<DiscontinuousInterpolate>false</DiscontinuousInterpolate>
+		<StartKeyframe>-91445760000000000,50.,0,0,0,0,0,0</StartKeyframe>
+		<CurrentValue>50.</CurrentValue>
+		<LowerBound>-500.</LowerBound>
+		<UpperBound>500.</UpperBound>
+		<LowerUIBound>0.</LowerUIBound>
+		<UpperUIBound>100.</UpperUIBound>
+		<ParameterID>1</ParameterID>
+		<UnitsString></UnitsString>
+	</VideoComponentParam>
+	<VideoComponentParam ObjectID="11" ClassID="fe47129e-6c94-4fc0-95d5-c056a517aaf3" Version="10">
+		<Name>Radius</Name>
+		<Node Version="1">
+		</Node>
+		<ParameterControlType>2</ParameterControlType>
+		<Keyframes></Keyframes>
+		<IsTimeVarying>false</IsTimeVarying>
+		<IsLocked>false</IsLocked>
+		<DiscontinuousInterpolate>false</DiscontinuousInterpolate>
+		<StartKeyframe>-91445760000000000,5.,0,0,0,0,0,0</StartKeyframe>
+		<CurrentValue>5.</CurrentValue>
+		<LowerBound>0.100006103516</LowerBound>
+		<UpperBound>500.</UpperBound>
+		<UpperUIBound>100.</UpperUIBound>
+		<ParameterID>2</ParameterID>
+		<UnitsString></UnitsString>
+	</VideoComponentParam>
+	<VideoComponentParam ObjectID="12" ClassID="fe47129e-6c94-4fc0-95d5-c056a517aaf3" Version="10">
+		<Name>Threshold</Name>
+		<Node Version="1">
+		</Node>
+		<ParameterControlType>2</ParameterControlType>
+		<Keyframes></Keyframes>
+		<IsTimeVarying>false</IsTimeVarying>
+		<IsLocked>false</IsLocked>
+		<DiscontinuousInterpolate>false</DiscontinuousInterpolate>
+		<StartKeyframe>-91445760000000000,0.,0,0,0,0,0,0</StartKeyframe>
+		<CurrentValue>0.</CurrentValue>
+		<LowerBound>0.</LowerBound>
+		<UpperBound>1.</UpperBound>
+		<ParameterID>3</ParameterID>
+		<UnitsString></UnitsString>
+	</VideoComponentParam>
+</PremiereData>

@@ -1,0 +1,174 @@
+/* Saturni · Debug — слой отладки поверх приложения (все классы с префиксом sdbg-).
+   Пунктир чёткий: у рамок целые координаты и нет transform / backdrop-filter — они размывают линию. */
+#sdbg-root { position: fixed; inset: 0; z-index: 10000; pointer-events: none; font: 400 12.5px/1.4 "Inter", "Segoe UI", system-ui, sans-serif; color: #f1f1f6; }
+#sdbg-root.on .sdbg-catch { pointer-events: auto; }
+#sdbg-root:not(.on) .sdbg-bubs { display: none; }
+.sdbg-catch { position: absolute; inset: 0; }
+.sdbg-scr { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: none; }
+.sdbg-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.sdbg-svg path.sh { fill: rgba(255,255,255,.06); stroke: #fff; stroke-width: 1; stroke-dasharray: 3 2; stroke-linejoin: round; }   /* тот же мелкий пунктир, что у рамок (DASH в debug.js) */
+.sdbg-svg path.sh.act { fill: rgba(255,255,255,.12); stroke: #ffd166; }
+.sdbg-svg path.draw { fill: rgba(255,255,255,.06); stroke: #fff; stroke-width: 1; stroke-dasharray: 3 2; stroke-linejoin: round; }
+/* пунктир по пикселям (crispDash в debug.js): рамки бара и заметок, прямоугольные обводки */
+.sdbg-dash { position: absolute; left: -1px; top: -1px; overflow: visible; pointer-events: none; fill: none; stroke-width: 1; }
+.sdbg-bar > .sdbg-dash { stroke: #ffd166; }
+/* прямые штрихи (ds) на 80 %, на скруглениях (dc) — полная яркость: сглаживание на дуге её съедает, так они выглядят одинаково */
+.sdbg-dash .ds, .sdbg-svg g.crisp .st .ds { stroke-opacity: .7; }
+.sdbg-svg g.crisp .fl { fill: rgba(255,255,255,.06); stroke: none; }
+.sdbg-svg g.crisp .st { fill: none; stroke: #fff; stroke-width: 1; stroke-linecap: butt; }
+.sdbg-svg g.crisp.act .fl { fill: rgba(255,255,255,.12); }
+.sdbg-svg g.crisp.act .st { stroke: #ffd166; }
+.sdbg-svg path.mk { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* заметка: слева номер (под ним в открытой микрофон и корзина), справа поле постоянного размера */
+.sdbg-bub { position: absolute; pointer-events: auto; display: flex; gap: 6px; align-items: flex-start; cursor: move; }
+/* id в селекторе: общие правила программы (`.empty`, `.open`, `.show` → display: none) не должны прятать заметку — так было в Subs */
+#sdbg-root.on .sdbg-bubs .sdbg-bub { display: flex; }
+#sdbg-root.hide-notes .sdbg-bubs .sdbg-bub { display: none; }
+.sdbg-bub .side { display: flex; flex-direction: column; gap: 5px; flex: none; }
+.sdbg-bub .n, .sdbg-bub .rd { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #16161c; color: #ffd166; box-shadow: 0 3px 10px rgba(0,0,0,.5); }
+.sdbg-bub .n { font-weight: 700; font-size: 12px; line-height: 1; }
+.sdbg-bub .rd { border: 0; padding: 0; cursor: pointer; display: none; transition: background .15s, color .15s, opacity .18s; }
+/* микрофон не пишет и курсор ушёл с заметки — гаснет, как неактивный */
+.sdbg-bub.open:not(.rec):not(:hover) .rd.mic { opacity: .35; }
+.sdbg-bub { transition: opacity .18s; }
+.sdbg-bub .rd svg { width: 14px; height: 14px; }
+.sdbg-bub.open .rd { display: grid; }
+/* пишет: жёлтая заливка, чёрный значок, жёлтое свечение дышит с голосом (--lv), никакой красной тени */
+.sdbg-bub .mic { --lv: 0; transition: background .15s, color .15s, box-shadow .08s linear; }
+.sdbg-bub .mic.rec { background: #ffd166; color: #111; box-shadow: 0 0 calc(4px + var(--lv) * 18px) calc(var(--lv) * 4px) rgba(255,209,102,.55); }
+.sdbg-bub .del { color: #8c8c98; }
+.sdbg-bub .del:hover { color: #ff6b6b; }
+.sdbg-bub .box { position: relative; width: 260px; height: 86px; box-sizing: border-box; border: 1px solid transparent; border-radius: 10px; background: #16161c;
+  box-shadow: 0 8px 26px -10px rgba(0,0,0,.8); padding: 7px 10px; }
+.sdbg-bub .box > .sdbg-dash { stroke: #fff; }
+.sdbg-bub.open .box > .sdbg-dash, .sdbg-bub.rec .box > .sdbg-dash { stroke: #ffd166; }
+.sdbg-bub .scroll { width: 100%; height: 100%; overflow-y: auto; scrollbar-width: none; word-break: break-word; cursor: pointer; }
+.sdbg-bub.open .scroll { cursor: text; }
+.sdbg-bub .scroll::-webkit-scrollbar { display: none; }
+.sdbg-bub .e { display: inline-block; min-width: 3px; max-width: 100%; color: #fff; outline: none; white-space: pre-wrap; user-select: text; caret-color: #ffd166; }
+/* пустая заметка: без подсказки-текста, только еле видная подложка; надиктованное встаёт сразу */
+.sdbg-bub.sdbg-empty .box { background: #1a1a21; }
+.sdbg-bub .lv { color: #9a9aab; font-style: italic; white-space: pre-wrap; }
+.sdbg-bub .lv.wait { animation: sdbg-pulse 1.1s ease-in-out infinite; }
+.sdbg-bub.pend:not(.open) .scroll { animation: sdbg-pulse 1.1s ease-in-out infinite; }   /* вышел из заметки: пульсирует всё, снизу этого не видно */
+@keyframes sdbg-pulse { 50% { opacity: .4; } }
+.sdbg-bub .jump { position: absolute; right: 5px; bottom: 5px; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.08); color: #fff; opacity: .4;
+  cursor: pointer; display: none; place-items: center; }
+.sdbg-bub .jump svg { width: 12px; height: 12px; }
+.sdbg-bub .jump:hover { opacity: 1; }
+.sdbg-bub .jump.show { display: grid; }
+
+/* нижний бар: только значки, таскается за свободное место */
+/* нижний бар всегда поверх заметок; первая пара: «мышь» (жмём интерфейс) | «область» (заметка) */
+.sdbg-bar { position: absolute; z-index: 2147483000; pointer-events: auto; display: none; align-items: center; gap: 2px; padding: 6px 10px; border-radius: 11px; background: #121218;
+  border: 1px solid transparent; box-shadow: 0 14px 40px -12px rgba(0,0,0,.85); cursor: move; }
+#sdbg-root.on .sdbg-bar { display: flex; }
+.sdbg-bar .sp { width: 12px; }   /* группы разделяет пустое место, без линий */
+.sdbg-pair { display: inline-flex; align-items: center; gap: 1px; }
+.sdbg-ib { width: 34px; height: 34px; padding: 0; border: 0; border-radius: 8px; background: none; color: #a5a5b2; cursor: pointer; display: grid; place-items: center; transition: color .12s; }
+.sdbg-ib:hover { color: #fff; }
+.sdbg-ib.on { color: #ffd166; }
+.sdbg-dd { width: 12px; height: 34px; margin: 0 2px 0 -9px;   /* стрелка вплотную к своей иконке (~3 px), а не посередине между кнопками */ padding: 0; border: 0; border-radius: 6px; background: none; color: #6e6e7a; cursor: pointer; display: grid; place-items: center; }
+.sdbg-dd:hover { color: #fff; }
+.sdbg-catch.pass { pointer-events: none !important; }     /* режим «мышь»: интерфейс под слоем живой */
+.sdbg-ib[data-a="exit"]:hover { color: #5be08f; }
+#sdbg-root.hide-notes .sdbg-bub, #sdbg-root.hide-notes path.sh { display: none; }
+#sdbg-root.shot .sdbg-bub, #sdbg-root.shot .sdbg-bar, #sdbg-root.shot .sdbg-pop { visibility: hidden; }   /* на снимке заметки не мешают */
+
+.sdbg-pop { position: absolute; z-index: 2147483001; pointer-events: auto; display: none; flex-direction: column; gap: 2px; min-width: 180px; padding: 6px; border-radius: 12px; background: #121218; box-shadow: 0 14px 40px -12px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.06); }
+.sdbg-pop hr { border: 0; height: 1px; background: rgba(255,255,255,.08); margin: 3px 4px; }
+.sdbg-pop .tk { width: 16px; height: 16px; display: grid; place-items: center; color: #ffd166; flex: none; }
+.sdbg-pop .tk svg { width: 14px; height: 14px; }
+.sdbg-pop button { height: 28px; padding: 0 6px; border: 0; border-radius: 7px; background: none; color: #bbb; font: inherit; line-height: 1; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.sdbg-pop button:hover { color: #fff; }
+.sdbg-pop button.on { color: #ffd166; }
+.sdbg-pop input { width: 100%; margin: 6px 0; accent-color: #ffd166; }
+/* толщина и цвет ручки — одинаковые полосы 10 px с кружком 16 px; у толщины рядом превью настоящего размера и цвета */
+.sdbg-pop .szr { display: flex; align-items: center; gap: 10px; padding: 0 2px; }
+.sdbg-pop .szr input { flex: 1; min-width: 0; }
+.sdbg-pop svg.pv { flex: none; overflow: visible; }
+.sdbg-pop input.size, .sdbg-pop input.hue { -webkit-appearance: none; appearance: none; height: 10px; margin: 8px 0; border-radius: 5px; cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12) inset; }
+.sdbg-pop input.hue { width: calc(100% - 4px); margin: 6px 2px 10px; }
+.sdbg-pop input.size { background: linear-gradient(90deg, #ffd166 0 var(--p, 0%), #2e2e37 var(--p, 0%)); }
+.sdbg-pop input.size::-webkit-slider-thumb, .sdbg-pop input.hue::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  cursor: pointer; box-shadow: 0 0 0 2px #121218, 0 0 0 3.5px rgba(255,255,255,.85); }
+.sdbg-pop input.size::-webkit-slider-thumb { background: #ffd166; }
+.sdbg-pop input.hue::-webkit-slider-thumb { background: var(--c, #fff); }
+.sdbg-pop .cols { display: flex; gap: 7px; padding: 2px 4px 6px; }
+.sdbg-pop .cols i { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; opacity: .3; transition: opacity .15s; }   /* выбранный — ярко, остальные тусклые, без обводки */
+.sdbg-pop .cols i:hover { opacity: .65; }
+.sdbg-pop .cols i.on { opacity: 1; }
+
+.sdbg-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 10px; border: 0; border-radius: 8px;
+  background: none; color: inherit; opacity: .75; cursor: pointer; font: inherit; line-height: 1; }
+.sdbg-toggle:hover { opacity: 1; }
+.sdbg-toggle.on { opacity: 1; color: #fff; background: var(--accent, #3d9bff); }
+.sdbg-toggle .c { min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box; border-radius: 9px; background: #16161c; color: #ffd166; font-size: 10.5px; font-weight: 700; line-height: 1; display: none; place-items: center; }
+.sdbg-toggle .c.has { display: inline-grid; }
+
+/* шестерёнка приложения: число заметок на её углу, меню по правому клику */
+/* классы удвоены: стили кнопок программ (.tbtn > span и т.п.) не должны их перебивать */
+/* число заметок — просто жёлтая цифра, левым краем у правого края значка (left ставит debug.js) */
+.sdbg-badge.sdbg-badge { position: absolute; top: 3px; padding: 0; display: block; color: #ffd166; font: 600 9px/1 Inter, "Segoe UI", sans-serif; white-space: nowrap;
+  pointer-events: none; font-variant-numeric: tabular-nums; z-index: 2; }
+/* жучок — без кружка, высота 13 px (18 было велико), середина = середине строки цифр (top 3 + 4.5 − 6.5); left ставит debug.js — на 1 px правее
+   начала цифр. viewBox в debug.js обрезан по жучку с запасом на линию. Появляется и прячется плавно, цифры — наоборот */
+.sdbg-bugb.sdbg-bugb { position: absolute; padding: 0; top: 1px; width: auto; height: auto; border: 0; background: none; color: #ffd166;
+  display: block; opacity: 0; pointer-events: none; cursor: pointer; z-index: 3; transition: opacity .18s; }
+.sdbg-bugb svg { width: 13.8px; height: 13px; display: block; }
+.sdbg-corner > .sdbg-bugb.sdbg-bugb { opacity: 1; pointer-events: auto; }
+.sdbg-badge.sdbg-badge { transition: opacity .18s; }
+.sdbg-corner > .sdbg-badge.sdbg-badge { opacity: 0; }
+.sdbg-gmenu { position: fixed; z-index: 10002; display: none; flex-direction: column; gap: 2px; min-width: 190px; padding: 6px; border-radius: 12px;
+  background: #121218; box-shadow: 0 14px 40px -12px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.06); font: 13px/1 Inter, "Segoe UI", sans-serif; }
+.sdbg-gmenu button { height: 30px; padding: 0 8px; border: 0; border-radius: 7px; background: none; color: #c8c8d0; font: inherit; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; gap: 9px; text-align: left; }
+.sdbg-gmenu button:hover { color: #fff; }
+.sdbg-gmenu button span { flex: 1; }
+.sdbg-gmenu button em { font-style: normal; font-size: 11px; color: #6e6e7a; }
+
+/* история правок: правый клик по жучку на шестерёнке */
+.sdbg-hist { position: fixed; z-index: 10002; display: none; flex-direction: column; gap: 2px; width: 380px; max-width: calc(100vw - 8px); max-height: 70vh;
+  padding: 6px; border-radius: 12px; box-sizing: border-box; background: #121218; color: #c8c8d0;
+  box-shadow: 0 14px 40px -12px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.06); font: 13px/1.35 Inter, "Segoe UI", sans-serif; }
+.sdbg-hist .hd { flex: none; padding: 6px 8px 8px; color: #6e6e7a; font-size: 11px; line-height: 1; }
+.sdbg-hist button { flex: none; display: grid; grid-template-columns: 1fr auto 16px; align-items: center; column-gap: 9px; row-gap: 3px; min-height: 30px;
+  padding: 6px 8px; border: 0; border-radius: 7px; background: none; color: #c8c8d0; font: inherit; line-height: 1; text-align: left; cursor: pointer; }
+.sdbg-hist button:hover { background: rgba(255,255,255,.05); color: #fff; }
+.sdbg-hist button em { font-style: normal; font-size: 11px; color: #6e6e7a; }
+.sdbg-hist button svg { color: #5be08f; }
+.sdbg-hist button small { grid-column: 1 / -1; color: #6e6e7a; font-size: 11px; line-height: 1.35; }
+.sdbg-hist .nd { width: 16px; }
+.sdbg-hist .hd2 { flex: none; display: flex; align-items: center; gap: 4px; padding-right: 8px; }
+.sdbg-hist .hd2 em { font-style: normal; font-size: 11px; color: #6e6e7a; }
+.sdbg-hist .back { flex: 1; min-width: 0; grid-template-columns: 16px 1fr; color: #f1f1f6; font-size: 13px; padding: 6px 8px; }
+.sdbg-hist .tg { display: grid; place-items: center; width: 26px; min-height: 26px; padding: 0; grid-template-columns: none; color: #c8c8d0; opacity: .4; }
+.sdbg-hist .tg:hover { opacity: .75; background: none; color: #c8c8d0; }
+.sdbg-hist .tg.on { opacity: 1; color: #fff; }
+.sdbg-hist .tg svg { color: inherit; }
+.sdbg-hist:not(.els) .nt .el { display: none; }
+.sdbg-hist .back svg { color: inherit; }
+.sdbg-hist .none { padding: 8px; color: #6e6e7a; }
+.sdbg-hist .notes { overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 0; padding: 0 0 4px; }
+.sdbg-hist .nt { padding: 10px 8px; }   /* без своей подложки: заметки разделяет тонкая линия */
+.sdbg-hist .nt + .nt { border-top: 1px solid rgba(255,255,255,.07); }
+.sdbg-hist .nt .h { display: flex; align-items: center; gap: 8px; line-height: 1; font-size: 12px; }
+.sdbg-hist .nt .h b { color: #ffd166; font-weight: 600; }
+.sdbg-hist .nt .h span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #6e6e7a; font-size: 11px; }
+.sdbg-hist .nt .h svg { color: #5be08f; flex: none; }
+.sdbg-hist .nt p { margin: 5px 0 0; font-size: 12px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+.sdbg-hist .nt p.w { color: #9a9aa6; font-size: 11px; }
+.sdbg-hist .nt .mt { color: #6e6e7a; }
+.sdbg-hist .nt img { display: block; max-width: 60%; max-height: 80px; margin-top: 6px; border-radius: 6px; cursor: zoom-in; }
+.sdbg-hist .nt .el { margin-top: 6px; color: #6e6e7a; font-size: 11px; overflow-wrap: anywhere; }
+.sdbg-hist .nt code { font: 11px Consolas, monospace; color: #9a9aa6; }
+.sdbg-view { position: fixed; inset: 0; z-index: 10003; display: grid; place-items: center; background: rgba(0,0,0,.75); cursor: zoom-out; }
+.sdbg-view img { max-width: calc(100vw - 40px); max-height: calc(100vh - 40px); border-radius: 8px; }
+.sdbg-hist .nt p.tx { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; max-height: 5.6em; cursor: pointer; }
+.sdbg-hist .nt p.tx.open { display: block; max-height: none; }
+.sdbg-hist button small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* значки 18 px — только в баре и меню инструментов; в меню шестерёнки и истории — 16 */
+.sdbg-gmenu svg, .sdbg-hist svg { width: 16px; height: 16px; }

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "premiere-pro": {
+      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "D:\\@Hub\\# Saturni · Editor\\#Series\\@tools\\mcp\\premiere-pro-mcp\\dist\\index.js"
+      ],
+      "env": {
+        "PREMIERE_UXP_TOKEN": "ПРИДУМАЙ-ЛЮБОЙ-ДЛИННЫЙ-ПАРОЛЬ-И-ВСТАВЬ-ЕГО-В-ПАНЕЛЬ-ПЛАГИНА",
+        "PREMIERE_UXP_PORT": "7777"
+      }
+    }
+  }
+}

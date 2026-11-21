@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saturni · Audio Cleaner</title>
+<style>
+:root{
+  --bg:#0b0d12; --side:#0d1016; --card:#12151c; --card2:#191d26; --hover:#1f2430; --line:#232937;
+  --text:#e8ebf1; --muted:#8a93a6; --faint:#5d6578;
+  --accent:#3d9bff; --accent-h:#5cadff; --accent-soft:rgba(61,155,255,.13);
+  --ok:#3ecf8e; --ok-soft:rgba(62,207,142,.12); --bad:#f47174; --bad-soft:rgba(244,113,116,.12);
+  --wave:#2b3242; --wave-dim:#1d222d;
+  --weak:#a9dcff; --soft:#3d9bff; --medium:#34d399; --strong:#f5c84c;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:14px/1.4 "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  display:flex;overflow:hidden;-webkit-font-smoothing:antialiased;user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:disabled{cursor:default}
+input{font:inherit;color:inherit}
+svg{display:block}
+.hidden{display:none!important}
+
+/* sidebar */
+.side{width:96px;flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 0 18px;border-right:1px solid var(--line);background:var(--side)}
+.nav{width:80px;padding:12px 4px 10px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:11.5px;line-height:1.25;text-align:center;transition:background .15s,color .15s}
+.nav svg{width:22px;height:22px}
+.nav:hover{background:var(--hover);color:var(--text)}
+.nav.on{background:linear-gradient(180deg,rgba(90,174,255,.40),rgba(50,144,245,.20));box-shadow:inset 0 1px 0 rgba(255,255,255,.14);color:#fff}
+.nav.on svg{color:#e3f0ff}
+.gear{margin-top:auto;width:40px;height:40px;display:grid;place-items:center;border-radius:10px;color:var(--muted)}
+.gear svg{width:20px;height:20px}
+.gear:hover,.gear.on{color:var(--text)}
+.setpop{position:fixed;left:104px;bottom:16px;z-index:50;width:220px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:0 14px 40px -12px rgba(0,0,0,.85);display:flex;flex-direction:column;gap:10px}
+.setpop .row{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px;line-height:1}
+.setpop .lseg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.setpop .lseg button{height:26px;min-width:40px;line-height:1;font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+.setpop .lseg button:hover{color:var(--text)}
+.setpop .lseg button.on{color:var(--text);box-shadow:inset 0 0 0 1px var(--accent);border-radius:7px}
+.setpop .hint{font-size:11.5px;color:var(--muted);opacity:.7;line-height:1.35}
+
+main{flex:1;min-width:0;display:flex;flex-direction:column}
+.scroller{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+.col.center{margin:auto}
+.col.center .head{text-align:center}
+.col{width:min(780px,calc(100% - 80px));margin:0 0 0 40px;padding:40px 0 56px;display:flex;flex-direction:column;gap:20px}
+
+/* result: full width */
+.res-view{padding:32px 40px 32px}
+.r-head{display:flex;align-items:flex-start;gap:16px}
+.r-acts{display:flex;flex-direction:column;gap:8px;flex:none}
+.r-acts .ghost{width:100%;height:36px;padding:0 14px;border-radius:10px;background:var(--card2);color:var(--text)}
+.r-acts .ghost:hover{background:var(--hover)}
+.r-acts .menu{top:42px}
+.r-title{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.r-head .report{margin:12px 0 0;padding:0;border:0}
+.bigplay{flex:1;height:56px;border-radius:12px;background:var(--card2);color:var(--text);display:grid;place-items:center;transition:background .15s}
+.bigplay:hover{background:var(--hover)}
+.bigplay svg{width:28px;height:28px}
+.tracks{margin-top:24px;display:flex;flex-direction:column;gap:18px}
+.trk{display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px;align-items:center}
+.trk-head{display:flex;align-items:center;gap:2px;min-width:0}
+.tname{height:30px;padding:0 12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;border-radius:14px;font-size:13px;font-weight:500;color:var(--muted);transition:background .15s,color .15s}
+.tname:hover{color:var(--text);background:var(--hover)}
+.tname.on{color:var(--text);background:linear-gradient(180deg,#222835,#191d26);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.trk-body{position:relative;height:88px;border-radius:12px;background:#0f1218;overflow:hidden;cursor:text;touch-action:none}
+.trk-body.panning{cursor:grabbing!important}
+.trk-body canvas{position:absolute;inset:0;width:100%;height:100%}
+.bottom{flex:none;border-top:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 40px 14px}
+.bottom .bigplay{width:100%;flex:none}
+.bigtime{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.bigtime span{color:var(--faint);font-weight:500}
+.hint2{font-size:12px;color:var(--faint);text-align:center;margin-top:18px}
+.head h1{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.head p{color:var(--muted);font-size:13px;margin-top:6px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
+.row{display:flex;align-items:center;gap:14px;min-width:0}
+.grow{flex:1;min-width:0}
+.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.title{font-weight:600}
+.sub{font-size:12px;color:var(--muted);margin-top:2px}
+.label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* buttons */
+.btn{height:44px;border-radius:10px;background:linear-gradient(180deg,#5aaeff,#3d9bff 60%,#3290f5);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);color:#fff;font-weight:600;padding:0 22px;transition:background .15s,opacity .15s}
+.btn:hover:not(:disabled){background:linear-gradient(180deg,#72baff,#55aaff 60%,#4199f7)}
+.btn:disabled{background:var(--card2);color:var(--faint);box-shadow:none}
+.btn.wide{width:100%}
+.btn.sm{height:34px;padding:0 16px;font-size:13px;border-radius:9px}
+.ghost{height:32px;padding:0 12px;border-radius:8px;color:var(--muted);font-size:13px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.ghost:hover{background:var(--hover);color:var(--text)}
+.ghost svg{width:15px;height:15px}
+.ib{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--muted);flex:none}
+.ib:hover:not(:disabled){background:var(--hover);color:var(--text)}
+.ib:disabled{opacity:.3}
+.ib svg{width:16px;height:16px}
+.ib.round{width:42px;height:42px;border-radius:50%;background:linear-gradient(180deg,#5aaeff,#3d9bff 60%,#3290f5);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);color:#fff}
+.ib.round:hover{background:linear-gradient(180deg,#72baff,#55aaff 60%,#4199f7)}
+.ib.round svg{width:22px;height:22px}
+
+/* drop zone */
+.drop{border:2px solid transparent;--crisp-dash:#2c3343;border-radius:var(--r);height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;transition:.15s}
+body.dragging .drop{--crisp-dash:var(--accent);background:var(--accent-soft)}
+.drop .ico{width:48px;height:48px;border-radius:12px;background:var(--card2);display:grid;place-items:center;color:var(--accent)}
+.drop .ico svg{width:24px;height:24px}
+.drop h2{font-size:17px;font-weight:600}
+.drop p{color:var(--muted);font-size:13px;margin-top:4px}
+
+canvas.wave{width:100%;height:44px;cursor:pointer;display:block}
+
+/* lens segmented control: no frame, a droplet slides to the chosen item */
+.seg{position:relative;display:inline-flex;gap:2px;isolation:isolate}
+.seg button{position:relative;z-index:1;height:32px;padding:0 14px;border-radius:16px;color:var(--muted);font-size:13px;white-space:nowrap;transition:color .25s}
+.seg button:hover{color:var(--text)}
+.seg button.on{color:var(--lens-fg,var(--text))}
+.seg .lens{position:absolute;z-index:0;top:0;height:32px;border-radius:16px;
+  background:var(--lens-bg,var(--card2));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.09);
+  transition:left .22s cubic-bezier(.4,0,.2,1),width .22s cubic-bezier(.4,0,.2,1),background-color .25s;pointer-events:none}
+
+/* songs */
+.songs-head{display:flex;align-items:center;gap:10px;min-height:32px}
+.state{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.spin{width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.list{display:flex;flex-direction:column;margin-top:12px}
+.song{display:grid;grid-template-columns:36px minmax(0,1fr) auto 32px 32px;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+.song:first-child{border-top:0}
+.cover{width:36px;height:36px;border-radius:7px;background:var(--card2);object-fit:cover;display:grid;place-items:center;color:var(--faint)}
+.cover svg{width:16px;height:16px}
+.pill{font-size:12px;height:24px;line-height:24px;padding:0 10px;border-radius:12px;background:var(--card2);color:var(--muted);white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.empty{font-size:13px;color:var(--muted);padding:6px 0 2px}
+.add{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.search{display:flex;gap:8px}
+.field{flex:1;position:relative}
+.field input{width:100%;height:36px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:0 12px 0 34px;outline:none}
+.field input:focus{border-color:var(--accent)}
+.field svg{position:absolute;left:11px;top:10px;width:16px;height:16px;color:var(--faint)}
+.results{border:1px solid var(--line);border-radius:10px;max-height:264px;overflow-y:auto}
+.res{display:grid;grid-template-columns:56px minmax(0,1fr) 32px auto;gap:12px;align-items:center;padding:6px 8px 6px 6px;border-top:1px solid var(--line)}
+.res:first-child{border-top:0}
+.res img,.res .noimg{width:56px;height:32px;border-radius:5px;object-fit:cover;background:var(--card2)}
+.res .t{font-size:13px}
+.addbtn{height:28px;padding:0 10px;border-radius:7px;background:linear-gradient(180deg,rgba(61,155,255,.22),rgba(61,155,255,.09));color:var(--accent);font-size:12.5px;font-weight:600}
+.addbtn:hover{background:linear-gradient(180deg,rgba(61,155,255,.32),rgba(61,155,255,.15))}
+.res-msg{padding:10px 12px;font-size:13px;color:var(--muted)}
+.opt{display:flex;align-items:center;gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.check{display:flex;align-items:center;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);cursor:pointer}
+.sw{width:32px;height:18px;border-radius:9px;background:#2a3040;position:relative;transition:.15s;flex:none}
+.sw::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.15s}
+.check.on .sw{background:linear-gradient(180deg,#5aaeff,#3290f5)}
+.check.on .sw::after{left:16px}
+
+/* progress */
+.bar{height:4px;border-radius:2px;background:var(--card2);overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7cc2ff,#3d9bff);transition:width .4s}
+.err{color:var(--bad)}
+
+/* results */
+.report{display:flex;flex-direction:column;gap:6px;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.report div{font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.report b{color:var(--text);font-weight:500}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:none;transform:translateY(-1px)}
+.dot.warn{background:#e0a43a}
+.transport{display:flex;align-items:center;gap:14px}
+.time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;margin-top:2px}
+.tune{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;margin-top:18px}
+.scope{display:flex;align-items:center;gap:6px;font-size:13px;min-width:0}
+.scope .sw-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.scope .x{width:22px;height:22px;border-radius:6px;color:var(--faint);display:grid;place-items:center}
+.scope .x:hover{background:var(--hover);color:var(--text)}
+.scope .x svg{width:12px;height:12px}
+.grid3{display:grid;grid-template-columns:150px minmax(0,1fr) 100px;align-items:center;gap:16px}
+.lane-row{margin-top:16px}
+.lane{position:relative;height:30px;border-radius:8px;background:var(--card2);cursor:crosshair;overflow:hidden;touch-action:none}
+.lane .hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11.5px;color:var(--faint);pointer-events:none;padding:0 8px;text-align:center}
+.lane .cursor{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.35);pointer-events:none}
+.reg{position:absolute;top:3px;bottom:3px;border-radius:6px;cursor:grab;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#0b0d12;overflow:hidden;white-space:nowrap}
+.reg.sel{box-shadow:0 0 0 2px #fff}
+.reg .h{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize}
+.reg .h.l{left:0}.reg .h.r{right:0}
+.stem{padding:14px 0;border-top:1px solid var(--line)}
+.stems-wrap{margin-top:12px}
+.stem .name{font-size:13.5px;font-weight:500}
+.ctl{display:flex;gap:2px;align-items:center;justify-content:flex-end}
+.tg{width:28px;height:28px;border-radius:7px;font-size:11px;font-weight:700;color:var(--faint)}
+.tg:hover{background:var(--hover);color:var(--text)}
+.tg.on.m{background:var(--bad-soft);color:var(--bad)}
+.tg.on.s{background:var(--accent-soft);color:var(--accent)}
+.menu-wrap{position:relative}
+.menu{position:absolute;right:0;top:36px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:4px;z-index:10;min-width:150px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.menu button{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:7px;font-size:13px}
+.menu button:hover{background:var(--hover)}
+.foot{display:flex;justify-content:center}
+.rr{display:flex;align-items:center;gap:10px;justify-self:end;min-width:0}
+.rr .time{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rr .btn{flex:none}
+
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#262c3a;border-radius:5px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+
+@media (max-width:820px){
+  .col{width:calc(100% - 48px);margin-left:24px}
+  .res-view{padding:24px}
+  .bottom{padding:14px 24px 12px}
+  .trk{grid-template-columns:170px minmax(0,1fr);gap:8px}
+  .grid3{grid-template-columns:120px minmax(0,1fr) 100px;gap:12px}
+  .seg button{padding:0 11px}
+}
+</style>
+<link rel="stylesheet" href="/mod/debug/debug.css">
+</head>
+<body>
+
+<aside class="side">
+  <button class="nav" data-mode="speech"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span data-t="nav_speech"></span></button>
+  <button class="nav" data-mode="vocals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span data-t="nav_vocals"></span></button>
+  <button class="nav" data-mode="stems"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><mask id="clefcut" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><path transform="matrix(1.12 0 0 1.12 -2.3 -1.4)" d="M17.8 20.6 17.2 4.6c-.1-2 2.4-2.8 2.8-1 .5 2.2-1.4 4-3.4 5.6-2.2 1.8-3 3.2-3 5 0 2.2 1.7 3.6 3.8 3.6 2 0 3.4-1.3 3.4-3.2 0-1.7-1.2-2.9-2.8-2.9-1.4 0-2.4.9-2.4 2.2" stroke="#000" stroke-width="5"/></mask><path mask="url(#clefcut)" stroke-width="2.2" d="M2.5 7h16M2.5 12h16M2.5 17h16"/><path transform="matrix(1.12 0 0 1.12 -2.3 -1.4)" stroke-width="1.55" d="M17.8 20.6 17.2 4.6c-.1-2 2.4-2.8 2.8-1 .5 2.2-1.4 4-3.4 5.6-2.2 1.8-3 3.2-3 5 0 2.2 1.7 3.6 3.8 3.6 2 0 3.4-1.3 3.4-3.2 0-1.7-1.2-2.9-2.8-2.9-1.4 0-2.4.9-2.4 2.2"/></svg><span data-t="nav_stems"></span></button>
+  <button class="gear" id="gear" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</aside>
+<div class="setpop hidden" id="setpop"><div class="row"><span data-t="language"></span><div class="lseg" id="lseg"><button data-l="en">EN</button><button data-l="ru">RU</button></div></div><div class="hint">Ctrl+click the gear: Debug notes</div></div>
+
+<main><div class="scroller" id="scroller"><div class="col" id="col">
+
+  <div class="head"><h1 id="h-title"></h1><p id="h-sub"></p></div>
+
+  <section id="s-drop" class="drop">
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg></div>
+    <div><h2 id="drop-title" data-t="drop_title"></h2><p id="drop-sub" data-t="drop_sub"></p></div>
+    <button class="btn" id="pick" data-t="pick"></button>
+  </section>
+  <input type="file" id="file" class="hidden" accept="audio/*,video/*">
+
+  <section id="s-file" class="card hidden">
+    <div class="row">
+      <button class="ib round" id="in-play"></button>
+      <div class="grow"><div class="title ell" id="f-name"></div><div class="time" id="f-meta"></div></div>
+      <button class="ghost" id="f-change" data-t="change"></button>
+    </div>
+    <canvas class="wave" id="in-wave" style="margin-top:16px"></canvas>
+  </section>
+
+  <section id="s-songs" class="card hidden">
+    <div class="songs-head">
+      <div class="label grow" data-t="songs"></div>
+      <div class="state" id="an-state"></div>
+      <button class="ghost" id="add-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span data-t="add"></span></button>
+    </div>
+    <div class="list" id="songs"></div>
+    <div class="add hidden" id="add">
+      <div class="search">
+        <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" data-tp="search_ph" autocomplete="off" spellcheck="false"></div>
+        <button class="ghost" id="ref-file" style="height:36px" data-t="own_file"></button>
+      </div>
+      <div class="results hidden" id="results"></div>
+    </div>
+    <div class="opt">
+      <div class="grow"><div style="font-size:13px" data-t="strength"></div><div class="sub" id="str-desc"></div></div>
+      <div class="seg lv" id="strength"></div>
+    </div>
+    <div class="check on" id="fallback"><div class="sw"></div>
+      <div><div style="font-size:13px" data-t="fallback"></div><div class="sub" data-t="fallback_sub"></div></div>
+    </div>
+  </section>
+
+  <section id="s-stems" class="card hidden">
+    <div class="row"><div class="grow"><div data-t="tracks"></div><div class="sub ell" id="stem-desc"></div></div>
+      <div class="seg" id="stemcount"></div>
+    </div>
+  </section>
+
+  <section id="s-run" class="hidden"><button class="btn wide" id="start"></button></section>
+
+  <section id="s-prog" class="card hidden">
+    <div class="row"><div class="grow ell" id="p-msg"></div><div class="time" id="p-pct" style="margin:0"></div></div>
+    <div class="bar"><i id="p-bar"></i></div>
+  </section>
+
+</div>
+
+  <section id="s-result" class="res-view hidden">
+    <div class="r-head">
+      <div class="grow"><div class="r-title ell" id="r-name"></div><div class="report hidden" id="report"></div></div>
+      <div class="r-acts">
+        <button class="ghost" id="again"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5V17a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9.5a2 2 0 0 0-2-2h-7l-2-2.5H5a2 2 0 0 0-2 2z"/></svg><span data-t="open_new"></span></button>
+        <div class="menu-wrap" id="all-wrap"><button class="ghost" id="save-all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span data-t="save_all"></span></button></div>
+      </div>
+    </div>
+    <div id="tune-box" class="hidden">
+      <div class="tune">
+        <div class="scope" id="scope"></div>
+        <div class="seg lv" id="r-strength"></div>
+        <div class="rr"><span class="time" id="rr-msg"></span><button class="btn sm" id="rerender" data-t="rerender"></button></div>
+      </div>
+    </div>
+    <div class="tracks" id="tracks"></div>
+    <div class="hint2" id="hint2"></div>
+  </section>
+  </div>
+  <footer class="bottom hidden" id="bottom">
+    <button class="bigplay" id="m-play"></button>
+    <div class="bigtime"><b id="t-cur">0:00.0</b> <span>/ <span id="t-dur">0:00</span></span></div>
+  </footer>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+/* ================= i18n ================= */
+const plRu = (n,a,b,c) => { const m10=n%10, m100=n%100; return m10===1&&m100!==11?a:m10>=2&&m10<=4&&(m100<10||m100>=20)?b:c; };
+const I18N = {
+ en:{
+  nav_speech:"Remove music", nav_vocals:"Vocals & music", nav_stems:"Instruments", language:"Language",
+  h_speech:["Remove music","Songs are removed from the recording — speech and background sounds stay."],
+  h_vocals:["Vocals & music","Splits a song into the singer's voice and the music."],
+  h_stems:["Instruments","Every part on its own track."],
+  drop_title:"Drop a file here", drop_sub:"Audio or video: WAV, MP3, MP4, MOV…", pick:"Choose file", opening:"Opening…",
+  open_fail:"Couldn't open the file: ", change:"Another file", open_new:"Open new",
+  songs:"Songs in the recording", add:"Add", search_ph:"Song title or artist", own_file:"Own file…",
+  strength:"Strength", weak:"Light", soft:"Soft", medium:"Medium", strong:"Strong",
+  d_weak:"Removes only what it is sure about. Background stays untouched.",
+  d_soft:"Removes the song gently, keeps background sounds.",
+  d_medium:"Removes the song, barely touches background sounds.",
+  d_strong:"Removes all music where the song plays, with some background.",
+  fallback:"Remove unrecognised music with AI", fallback_sub:"Where no song was found. May slightly affect background sounds.",
+  tracks:"Tracks", n4:"4 tracks", n6:"6 tracks", d4:"Vocals, drums, bass, other", d6:"Vocals, drums, bass, guitar, keys, other",
+  run_speech:"Remove music", run_vocals:"Split into vocals and music", run_stems:"Split into instruments", waiting:"Checking songs…",
+  listening:"Listening…", auto_off:"Auto search unavailable",
+  no_songs:"No songs recognised. Add one if you know what plays.", add_songs:"Add the songs that play in the recording.",
+  st_searching:"Looking for the full song…", st_downloading:"Downloading…", st_checking:"Comparing with the recording…",
+  st_no_source:"No full version — add a file", manual:"Added manually", st_ready:"Ready", st_notin:"Not in this recording",
+  dl_pct:p=>`Downloading ${p}%`, dl_fail:"Download failed",
+  found:(n,t)=>`Found · ${n} ${n===1?"part":"parts"} · ${t}`,
+  listen:"Listen", ignore:"Ignore", searching:"Searching…", nothing:"Nothing found", search_fail:"Search failed: ",
+  save_all:"Save all", again:"Process another file", mute:"Mute", solo:"Solo", save:"Save", wav:"WAV (lossless)",
+  how_spec:"removed by its spectrum", how_exact:"subtracted exactly", how_mix:"removed",
+  parts_n:n=>`${n} ${n===1?"part":"parts"}`, unknown:(a,b)=>`Unrecognised music ${a}–${b} — removed by AI`,
+  whole:"Whole file", part:(a,b)=>`Part ${a}–${b}`, del_part:"Delete part",
+  parts:"Parts", lane_hint:"Drag here to select a part and give it its own strength",
+  rerender:"Re-render", rerendering:"Re-rendering…",
+  hint_parts:"Drag on a track to mark a part · Wheel: zoom · Right-drag: move along", hint_zoom:"Click: play from there · Wheel: zoom · Right-drag: move along",
+  play:"Play", pause:"Pause", only:"Click to hear only this track · click again to hear all",
+  stems:{nomusic:"Clean sound", music:"Removed music", vocals:"Vocals", instrumental:"Music", drums:"Drums", bass:"Bass", guitar:"Guitar", piano:"Keys", other:"Other"},
+  msg:{queued:"Queued…", reading:"Reading the file…", exact:"Looking for exact matches…", subtract:"Subtracting songs…",
+       separate:"Separating music…", spectral:"Matching songs by spectrum…", rendering:"Rendering…", saving:"Saving…",
+       load_model:"Loading the model…", splitting:"Splitting…", listening:"Listening…", no_songs:"No songs recognised",
+       yt_bot:"YouTube refused the download — pick SoundCloud or your own file", bad_file:"Can't read this file — is it audio or video?",
+       no_file:"File not found", done:s=>`Done in ${s} s`},
+  err:"Error: ",
+ },
+ ru:{
+  nav_speech:"Убрать музыку", nav_vocals:"Вокал и музыка", nav_stems:"Инструменты", language:"Язык",
+  h_speech:["Убрать музыку","Песни из записи убираются, речь и фоновые звуки остаются."],
+  h_vocals:["Вокал и музыка","Делит песню на голос исполнителя и музыку."],
+  h_stems:["Инструменты","Каждая партия — отдельной дорожкой."],
+  drop_title:"Перетащите файл сюда", drop_sub:"Аудио или видео: WAV, MP3, MP4, MOV…", pick:"Выбрать файл", opening:"Открываю…",
+  open_fail:"Не получилось открыть файл: ", change:"Другой файл", open_new:"Открыть новый",
+  songs:"Песни в записи", add:"Добавить", search_ph:"Название песни или исполнитель", own_file:"Свой файл…",
+  strength:"Сила удаления", weak:"Слабо", soft:"Мягко", medium:"Средне", strong:"Сильно",
+  d_weak:"Убирает только то, в чём уверен. Фон не трогает.",
+  d_soft:"Убирает песню бережно, фоновые звуки сохраняет.",
+  d_medium:"Убирает песню, фоновые звуки почти не трогает.",
+  d_strong:"Убирает всю музыку в местах песни, вместе с частью фона.",
+  fallback:"Убирать нераспознанную музыку нейросетью", fallback_sub:"Там, где песню не удалось найти. Может немного задеть фоновые звуки.",
+  tracks:"Дорожки", n4:"4 дорожки", n6:"6 дорожек", d4:"Вокал, ударные, бас, остальное", d6:"Вокал, ударные, бас, гитара, клавишные, остальное",
+  run_speech:"Убрать музыку", run_vocals:"Разделить на вокал и музыку", run_stems:"Разделить на инструменты", waiting:"Подождите, проверяю песни…",
+  listening:"Слушаю запись…", auto_off:"Автопоиск недоступен",
+  no_songs:"Песен не распознал. Добавьте вручную, если знаете, что играет.", add_songs:"Добавьте песни, которые звучат в записи.",
+  st_searching:"Ищу полную версию…", st_downloading:"Скачиваю…", st_checking:"Сверяю с записью…",
+  st_no_source:"Нет полной версии — добавьте файл", manual:"Добавлена вручную", st_ready:"Готово", st_notin:"Не звучит в записи",
+  dl_pct:p=>`Скачиваю ${p}%`, dl_fail:"Не скачалась",
+  found:(n,t)=>`Найдена · ${n} ${plRu(n,"фрагмент","фрагмента","фрагментов")} · ${t}`,
+  listen:"Прослушать", ignore:"Не учитывать", searching:"Ищу…", nothing:"Ничего не нашлось", search_fail:"Поиск не удался: ",
+  save_all:"Сохранить всё", again:"Обработать другой файл", mute:"Выключить", solo:"Только эта", save:"Сохранить", wav:"WAV (без потерь)",
+  how_spec:"убрана по спектру песни", how_exact:"вычтена точно по оригиналу", how_mix:"убрана",
+  parts_n:n=>`${n} ${plRu(n,"фрагмент","фрагмента","фрагментов")}`, unknown:(a,b)=>`Нераспознанная музыка ${a}–${b} — убрана нейросетью`,
+  whole:"Весь файл", part:(a,b)=>`Участок ${a}–${b}`, del_part:"Удалить участок",
+  parts:"Участки", lane_hint:"Проведите здесь мышью, чтобы выделить участок и задать ему свою силу",
+  rerender:"Перерендерить", rerendering:"Перерендериваю…",
+  hint_parts:"Протяните по дорожке, чтобы выделить участок · Колесо — масштаб · Правая кнопка — двигать", hint_zoom:"Клик — играть с этого места · Колесо — масштаб · Правая кнопка — двигать",
+  play:"Воспроизвести", pause:"Пауза", only:"Нажмите, чтобы слушать только эту дорожку · ещё раз — все",
+  stems:{nomusic:"Чистый звук", music:"Убранная музыка", vocals:"Вокал", instrumental:"Музыка", drums:"Ударные", bass:"Бас", guitar:"Гитара", piano:"Клавишные", other:"Остальное"},
+  msg:{queued:"В очереди…", reading:"Читаю файл…", exact:"Ищу точные совпадения…", subtract:"Вычитаю песни…",
+       separate:"Отделяю музыку…", spectral:"Сверяю песни по спектру…", rendering:"Собираю результат…", saving:"Сохраняю…",
+       load_model:"Загружаю модель…", splitting:"Разделяю…", listening:"Слушаю запись…", no_songs:"Песен не распознал",
+       yt_bot:"YouTube не дал скачать — возьмите SoundCloud или свой файл", bad_file:"Не удалось прочитать файл — это точно аудио или видео?",
+       no_file:"Файл не найден", done:s=>`Готово за ${s} с`},
+  err:"Ошибка: ",
+ }
+};
+let lang = (()=>{ try{ return localStorage.getItem("lang") || "en" }catch(e){ return "en" } })();
+const t = (k, ...a) => { const v = I18N[lang][k]; return typeof v === "function" ? v(...a) : (v ?? k); };
+const tmsg = m => {   // server messages: "@key[:arg]" or "!raw error"
+  if(!m) return "…";
+  if(m[0]==="!") return t("err") + m.slice(1);
+  if(m[0]!=="@") return m;
+  const [k, arg] = m.slice(1).split(":"); const v = I18N[lang].msg[k];
+  return typeof v === "function" ? v(arg) : (v || k);
+};
+
+/* ================= icons ================= */
+const ICON = {
+  play:`<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.6 6.1v11.8c0 .9 1 1.5 1.8 1l9.2-5.9c.7-.5.7-1.5 0-2L10.4 5.1c-.8-.5-1.8.1-1.8 1z"/></svg>`,
+  pause:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.6"/><rect x="13.5" y="5" width="4" height="14" rx="1.6"/></svg>`,
+  x:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`,
+  note:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>`,
+  dl:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>`,
+};
+
+/* ================= state ================= */
+const LEVELS = ["weak","soft","medium","strong"];
+const lvColor = L => getComputedStyle(document.documentElement).getPropertyValue("--"+L).trim();
+let mode = (()=>{ try{ return localStorage.getItem("mode") || "speech" }catch(e){ return "speech" } })();
+let stemMode = "stems4", fallback = true, strength = "medium";
+let job = null, manual = [], removed = new Set(), players = [], timer = null;
+let regions = [], selReg = null, rendered = null, rerendering = false, lastRefs = [];
+const desk = () => !!(window.pywebview && window.pywebview.api);
+const fmt = s => { s = Math.max(0, Math.round(s||0)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function api(url, opt={}){
+  if(opt.json){ opt = {...opt, method:opt.method||"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(opt.json)}; }
+  const r = await fetch(url, opt);
+  if(!r.ok){ let d=""; try{ d=(await r.json()).detail }catch(e){} throw new Error(tmsg(d) || r.statusText); }
+  return r.json();
+}
+
+/* ================= lens segmented control ================= */
+function Seg(el, items, value, onChange, colored){
+  el.innerHTML = `<span class="lens"></span>` + items.map(([v])=>`<button data-v="${v}"></button>`).join("");
+  const lens = el.querySelector(".lens");
+  const api_ = {
+    value,
+    labels(){ el.querySelectorAll("button").forEach((b,i)=>b.textContent = t(items[i][1])); this.place(false); },
+    set(v, animate=true){
+      const prev = this.value; this.value = v;
+      el.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.v===v));
+      if(colored){ const c = lvColor(v); el.style.setProperty("--lens-bg", c+"2e"); el.style.setProperty("--lens-fg", c); }
+      this.place(animate && prev !== v, prev);
+    },
+    place(animate, prev){
+      const b = el.querySelector(`button[data-v="${this.value}"]`); if(!b || !b.offsetWidth) return;
+      const to = {l:b.offsetLeft, w:b.offsetWidth};
+      const pb = prev && el.querySelector(`button[data-v="${prev}"]`);
+      if(animate && pb){
+        // droplet: stretch over both items, then settle on the new one
+        const l = Math.min(pb.offsetLeft, to.l), r = Math.max(pb.offsetLeft+pb.offsetWidth, to.l+to.w);
+        lens.style.left = l+"px"; lens.style.width = (r-l)+"px";
+        clearTimeout(lens._t); lens._t = setTimeout(()=>{   // measure again: labels may have changed meanwhile
+          const nb = el.querySelector(`button[data-v="${this.value}"]`);
+          lens.style.left = nb.offsetLeft+"px"; lens.style.width = nb.offsetWidth+"px"; }, 170);
+      } else {
+        clearTimeout(lens._t);
+        const tr = lens.style.transition; lens.style.transition = "none";
+        lens.style.left = to.l+"px"; lens.style.width = to.w+"px";
+        lens.offsetWidth; lens.style.transition = tr;
+      }
+    }
+  };
+  el.querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.v!==api_.value){ api_.set(b.dataset.v); onChange(b.dataset.v); } });
+  api_.labels(); api_.set(value, false);
+  return api_;
+}
+const LV_ITEMS = LEVELS.map(l=>[l,l]);
+const segStrength = Seg($("#strength"), LV_ITEMS, strength, v=>{ strength=v; $("#str-desc").textContent = t("d_"+v); }, true);
+const segStems = Seg($("#stemcount"), [["stems4","n4"],["stems6","n6"]], stemMode, v=>{ stemMode=v; $("#stem-desc").textContent = t(v==="stems4"?"d4":"d6"); });
+const segRegion = Seg($("#r-strength"), LV_ITEMS, "medium", v=>{
+  if(selReg){ selReg.level = v; lastLevel = v; try{ localStorage.setItem("lastLevel", v) }catch(e){} } else strength = v;
+  if(!selReg){ segStrength.set(v,false); $("#str-desc").textContent = t("d_"+v); }
+  renderScope(); drawLane(); drawAll(); updateDirty();
+}, true);
+
+/* ================= language ================= */
+function applyLang(){
+  document.documentElement.lang = lang;
+  $$("[data-t]").forEach(e=>e.textContent = t(e.dataset.t));
+  $$("[data-tp]").forEach(e=>e.placeholder = t(e.dataset.tp));
+  $$("#lseg button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
+  $("#str-desc").textContent = t("d_"+strength);
+  $("#stem-desc").textContent = t(stemMode==="stems4"?"d4":"d6");
+  segStrength.labels(); segStems.labels(); segRegion.labels();
+  render();
+  if(job && job.status==="done"){ players.forEach(p=>{ const n=p.el.querySelector(".tname"); n.textContent=t("stems")[p.o.key]||p.o.key; n.title=t("only");
+    p.el.querySelector(".dl").title=t("save"); }); renderReport(); renderScope(); updateHint(); setPlayIcon(a0() && !a0().paused); }
+  if(job && mode==="speech") renderSongs();
+}
+$("#lseg").onclick = e => { const l = e.target.closest("[data-l]")?.dataset.l; if(!l || l===lang) return; lang = l; try{ localStorage.setItem("lang", lang) }catch(e){} applyLang(); };
+$("#gear").onclick = () => { const p = $("#setpop"), on = p.classList.toggle("hidden") === false; $("#gear").classList.toggle("on", on); };
+document.addEventListener("mousedown", e => { if(!e.target.closest("#setpop,#gear")){ $("#setpop").classList.add("hidden"); $("#gear").classList.remove("on"); } });
+
+/* ================= layout ================= */
+function render(){
+  const st = job && job.status, busy = (st==="queued"||st==="running") && !rerendering, done = st==="done" || rerendering;
+  $$(".nav").forEach(b=>b.classList.toggle("on", b.dataset.mode===mode));
+  const h = t("h_"+mode); $("#h-title").textContent = h[0]; $("#h-sub").textContent = h[1];
+  $("#s-drop").classList.toggle("hidden", !!job);
+  $("#col").classList.toggle("center", !job);
+  $("#s-file").classList.toggle("hidden", !job || done);
+  $("#s-songs").classList.toggle("hidden", !job || mode!=="speech" || busy || done);
+  $("#s-stems").classList.toggle("hidden", !job || mode!=="stems" || busy || done);
+  $("#s-run").classList.toggle("hidden", !job || busy || done);
+  $("#s-prog").classList.toggle("hidden", !busy && st!=="error");
+  $("#s-result").classList.toggle("hidden", !done);
+  $("#col").classList.toggle("hidden", done);
+  $("#bottom").classList.toggle("hidden", !done);
+  $("#tune-box").classList.toggle("hidden", !(done && job && job.mode==="speech"));
+  if(!$("#start").disabled) $("#start").textContent = t("run_"+mode);
+  requestAnimationFrame(()=>{ segStrength.place(false); segStems.place(false); segRegion.place(false); });
+}
+function setMode(m){
+  if(job && (["queued","running"].includes(job.status))) return;
+  mode = m; try{ localStorage.setItem("mode", m) }catch(e){}
+  if(job && job.status==="done"){ stopPlayers(); job.status="uploaded"; }
+  if(job && m==="speech" && !job.analysis) analyze();
+  $("#start").disabled = false;
+  render(); if(job){ if(m==="speech") renderSongs(); requestAnimationFrame(()=>drawWave($("#in-wave"), job.peaks, 0)); }
+}
+$$(".nav").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+$("#fallback").onclick = () => { fallback=!fallback; $("#fallback").classList.toggle("on",fallback); };
+
+/* ================= open file ================= */
+$("#pick").onclick = async () => {
+  if(desk()){ let p; try{ p = await window.pywebview.api.pick_file(); }catch(e){ alert(t("open_fail") + (e.message||e)); return; }
+    if(p) openJob(api("/api/open",{json:{path:p}}), p.split(/[\\/]/).pop()); }
+  else $("#file").click();
+};
+$("#file").onchange = e => { const f=e.target.files[0]; if(f) uploadFile(f); e.target.value=""; };
+function uploadFile(f){ const fd=new FormData(); fd.append("file",f); openJob(api("/api/upload",{method:"POST",body:fd}), f.name); }
+let dragDepth = 0;
+document.addEventListener("dragenter", e=>{ e.preventDefault(); dragDepth++; document.body.classList.add("dragging"); });
+document.addEventListener("dragleave", ()=>{ if(--dragDepth<=0){ dragDepth=0; document.body.classList.remove("dragging"); } });
+document.addEventListener("dragover", e=>e.preventDefault());
+document.addEventListener("drop", e=>{
+  e.preventDefault(); dragDepth=0; document.body.classList.remove("dragging");
+  const f = e.dataTransfer.files[0];
+  if(f && (!job || !["running","queued"].includes(job.status))) { resetAll(); uploadFile(f); }
+});
+async function openJob(promise, name){
+  $("#drop-title").textContent = t("opening"); $("#drop-sub").textContent = name; $("#pick").classList.add("hidden");
+  try{
+    job = await promise;
+    $("#f-name").textContent = job.name; $("#f-meta").textContent = fmt(job.duration);
+    inA.src = `/api/job/${job.id}/input.mp3`;
+    regions = []; selReg = null; rendered = null;
+    for(const r of manual) if(r.status==="ready") api(`/api/job/${job.id}/match/${r.id}`,{method:"POST"});
+    if(mode==="speech") analyze();
+  }catch(err){ alert(t("open_fail")+err.message); }
+  $("#drop-title").textContent = t("drop_title"); $("#drop-sub").textContent = t("drop_sub"); $("#pick").classList.remove("hidden");
+  render(); if(job){ if(mode==="speech") renderSongs(); requestAnimationFrame(()=>drawWave($("#in-wave"), job.peaks, 0)); }
+}
+function resetAll(){ stopPlayers(); inA.pause(); pv.pause(); job=null; removed.clear(); regions=[]; selReg=null; rerendering=false; render(); }
+$("#f-change").onclick = resetAll;
+$("#again").onclick = resetAll;
+
+const inA = new Audio();
+$("#in-play").innerHTML = ICON.play; $("#m-play").innerHTML = ICON.play;
+$("#in-play").onclick = () => inA.paused ? inA.play() : inA.pause();
+inA.onplay = inA.onpause = () => $("#in-play").innerHTML = inA.paused ? ICON.play : ICON.pause;
+inA.ontimeupdate = () => job && drawWave($("#in-wave"), job.peaks, inA.currentTime/(job.duration||1));
+$("#in-wave").onclick = e => { const r=e.currentTarget.getBoundingClientRect(); inA.currentTime=(e.clientX-r.left)/r.width*job.duration; if(inA.paused) inA.play(); };
+
+/* ================= waveform ================= */
+function drawWave(cv, peaks, pos, dim, regs){
+  const dpr = devicePixelRatio||1, w = cv.clientWidth, h = cv.clientHeight;
+  if(!w || !peaks) return;
+  cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  const c = cv.getContext("2d"); c.scale(dpr,dpr);
+  const dur = (job && job.duration) || 1;
+  for(const r of regs||[]){ c.fillStyle = lvColor(r.level)+"1f"; c.fillRect(r.start/dur*w, 0, (r.end-r.start)/dur*w, h); }
+  const step = 3, bars = Math.floor(w/step), n = peaks.length;
+  let mx = 0.02; for(const v of peaks) if(v>mx) mx=v;
+  const css = getComputedStyle(document.documentElement);
+  const played = css.getPropertyValue("--accent").trim(), rest = css.getPropertyValue(dim?"--wave-dim":"--wave").trim();
+  for(let i=0;i<bars;i++){
+    const a = Math.floor(i*n/bars), b = Math.max(a+1, Math.floor((i+1)*n/bars));
+    let v=0; for(let k=a;k<b;k++) if(peaks[k]>v) v=peaks[k];
+    const bh = Math.max(2, Math.round((v/mx)*(h-2)));
+    c.fillStyle = !dim && i/bars < pos ? played : rest;
+    c.fillRect(i*step, Math.round((h-bh)/2), 2, bh);
+  }
+}
+
+/* ================= songs ================= */
+async function analyze(){ if(job){ job.analysis = {status:"running", progress:0, tracks:[]}; await api(`/api/job/${job.id}/analyze`,{method:"POST"}); poll(); } }
+function mergeSegs(list){
+  const segs = [];
+  for(const s of [...(list || [])].sort((a,b)=>a.mix_start-b.mix_start)){
+    const last = segs[segs.length-1];
+    if(last && s.mix_start < last.mix_end - 0.3) last.mix_end = Math.max(last.mix_end, s.mix_end);
+    else segs.push({mix_start:s.mix_start, mix_end:s.mix_end});
+  }
+  return segs;
+}
+function found(m){
+  const segs = mergeSegs(m && m.segments), tot = segs.reduce((s,x)=>s+x.mix_end-x.mix_start,0);
+  return [t("found", segs.length, fmt(tot)), "ok", segs.map(s=>`${fmt(s.mix_start)}–${fmt(s.mix_end)}`).join(", ")];
+}
+function songRows(){
+  const rows = [], an = job && job.analysis;
+  for(const tr of (an && an.tracks) || []){
+    const m = tr.ref && job.match[tr.ref];
+    rows.push({id:"a:"+tr.key, title:tr.title, artist:tr.artist, cover:tr.cover, ref:tr.status==="found"?tr.ref:null,
+      state: tr.status==="found" ? found(m) : tr.status==="no_source" ? [t("st_no_source"),"bad"] : [t("st_"+tr.status), "wait"]});
+  }
+  for(const r of manual){
+    const m = job && job.match[r.id];
+    let state;
+    if(r.status==="downloading") state = [r.progress>0.01 ? t("dl_pct", Math.round(r.progress*100)) : t("st_downloading"),"wait"];
+    else if(r.status==="error") state = [tmsg(r.error) || t("dl_fail"),"bad"];
+    else if(!job) state = [t("st_ready"),"wait"];
+    else if(!m || m.status==="checking") state = [t("st_checking"),"wait"];
+    else if(m.status==="found") state = found(m);
+    else state = [t("st_notin"),"bad"];
+    rows.push({id:"m:"+r.id, title:r.title, artist:t("manual"), cover:null,
+      ref: r.status==="ready" && m && m.status==="found" ? r.id : null, playRef: r.status==="ready" ? r.id : null, state});
+  }
+  return rows.filter(r=>!removed.has(r.id));
+}
+function renderSongs(){
+  if(!job) return;
+  const an = job.analysis, rows = songRows(), st = $("#an-state");
+  if(an && an.status==="running" && !(an.tracks||[]).length) st.innerHTML = `<div class="spin"></div>${t("listening")} ${an.progress?Math.round(an.progress/0.6*100)+"%":""}`;
+  else if(an && an.status==="error") st.innerHTML = `<span class="err">${t("auto_off")}</span>`;
+  else st.textContent = "";
+  const box = $("#songs");
+  if(!rows.length){
+    box.innerHTML = an && an.status==="running" ? "" : `<div class="empty">${an && an.status==="done" ? t("no_songs") : t("add_songs")}</div>`;
+  } else {
+    box.innerHTML = rows.map(r=>`<div class="song">
+      ${r.cover ? `<img class="cover" src="${esc(r.cover)}" alt="">` : `<div class="cover">${ICON.note}</div>`}
+      <div style="min-width:0"><div class="ell" style="font-size:13.5px">${esc(r.title)}</div><div class="sub ell">${esc(r.artist||"")}</div></div>
+      <div class="pill ${r.state[1]}" title="${esc(r.state[2]||r.state[0])}">${esc(r.state[0])}</div>
+      <button class="ib play" title="${t("listen")}" ${r.ref||r.playRef?"":"disabled"}>${pvId===(r.ref||r.playRef)&&!pv.paused?ICON.pause:ICON.play}</button>
+      <button class="ib rm" title="${t("ignore")}">${ICON.x}</button></div>`).join("");
+    box.querySelectorAll(".song").forEach((el,i)=>{
+      const r = rows[i], rid = r.ref||r.playRef;
+      el.querySelector(".play").onclick = () => rid && preview(`/api/refs/${rid}/audio`, rid);
+      el.querySelector(".rm").onclick = () => { removed.add(r.id); if(pvId===rid) pv.pause(); renderSongs(); };
+    });
+  }
+  const pending = (an && an.status==="running") || rows.some(r=>r.state[1]==="wait");
+  $("#start").disabled = pending;
+  $("#start").textContent = pending ? t("waiting") : t("run_"+mode);
+}
+$("#add-toggle").onclick = () => { const a=$("#add"); a.classList.toggle("hidden"); if(!a.classList.contains("hidden")) $("#q").focus(); };
+let qTimer=null, qSeq=0;
+$("#q").oninput = () => { clearTimeout(qTimer); qTimer=setTimeout(doSearch, 450); };
+$("#q").onkeydown = e => { if(e.key==="Enter"){ clearTimeout(qTimer); doSearch(); } if(e.key==="Escape") $("#results").classList.add("hidden"); };
+async function doSearch(){
+  const q=$("#q").value.trim(), box=$("#results"), seq=++qSeq;
+  if(!q){ box.classList.add("hidden"); return; }
+  box.classList.remove("hidden"); box.innerHTML = `<div class="res-msg">${t("searching")}</div>`;
+  try{
+    const res = await api("/api/search?q="+encodeURIComponent(q));
+    if(seq!==qSeq) return;
+    if(!res.length){ box.innerHTML = `<div class="res-msg">${t("nothing")}</div>`; return; }
+    box.innerHTML = res.map(r=>`<div class="res">${r.thumb?`<img src="${esc(r.thumb)}" alt="">`:`<div class="noimg"></div>`}
+      <div style="min-width:0"><div class="t ell">${esc(r.title)}</div><div class="sub ell">${r.src==="yt"?"YouTube":"SoundCloud"}${r.channel?" · "+esc(r.channel):""}${r.duration?" · "+fmt(r.duration):""}</div></div>
+      <button class="ib play" title="${t("listen")}">${ICON.play}</button><button class="addbtn">${t("add")}</button></div>`).join("");
+    box.querySelectorAll(".res").forEach((el,i)=>{
+      const r = res[i];
+      el.querySelector(".play").onclick = e => preview(`/api/preview?url=${encodeURIComponent(r.url)}`, "s:"+r.src+r.id, e.currentTarget);
+      el.querySelector(".addbtn").onclick = () => addRef(r);
+    });
+  }catch(err){ box.innerHTML = `<div class="res-msg err">${t("search_fail")}${esc(err.message)}</div>`; }
+}
+async function addRef(r){
+  pv.pause(); $("#results").classList.add("hidden"); $("#q").value=""; $("#add").classList.add("hidden");
+  const id = `${r.src}_${r.id}`; manual = manual.filter(x=>x.id!==id); removed.delete("m:"+id);
+  const ref = await api("/api/refs",{json:{src:r.src,id:r.id,url:r.url,title:r.title,job:job&&job.id}});
+  manual.push(ref); renderSongs(); poll();
+}
+$("#ref-file").onclick = async () => {
+  let ref;
+  try{
+    if(desk()){ const p = await window.pywebview.api.pick_file(); if(!p) return; ref = await api("/api/refs/open",{json:{path:p, job:job&&job.id}}); }
+    else { const inp=document.createElement("input"); inp.type="file"; inp.accept="audio/*,video/*";
+      const f = await new Promise(res=>{ inp.onchange=()=>res(inp.files[0]); inp.click(); }); if(!f) return;
+      const fd=new FormData(); fd.append("file",f); ref = await api("/api/refs/upload"+(job?`?job=${job.id}`:""),{method:"POST",body:fd}); }
+  }catch(err){ alert(err.message); return; }
+  $("#add").classList.add("hidden"); manual.push(ref); renderSongs(); poll();
+};
+const pv = new Audio(); let pvId=null, pvBtn=null;
+function preview(src, id, btn){
+  if(pvId===id && !pv.paused){ pv.pause(); return; }
+  pvId=id; pvBtn=btn||null; pv.src=src;
+  if(pvBtn) pvBtn.innerHTML = `<div class="spin"></div>`;
+  pv.play().then(()=>{ if(pvBtn) pvBtn.innerHTML=ICON.pause; else renderSongs(); }).catch(()=>{ if(pvBtn) pvBtn.innerHTML=ICON.play; });
+}
+pv.onpause = pv.onended = () => { if(pvBtn) pvBtn.innerHTML=ICON.play; else if(job && mode==="speech") renderSongs(); };
+function poll(){
+  clearInterval(timer);
+  timer = setInterval(async ()=>{
+    let pending = false;
+    try{
+      for(const r of manual) if(r.status==="downloading"){ Object.assign(r, await api(`/api/refs/${r.id}`)); pending=true; }
+      if(job){
+        const j = await api(`/api/job/${job.id}`);
+        job.analysis = j.analysis; job.match = j.match;
+        if(j.analysis && j.analysis.status==="running") pending = true;
+        if(Object.values(j.match||{}).some(m=>m.status==="checking")) pending = true;
+      }
+    }catch(e){}
+    if(job && mode==="speech" && !["running","queued","done"].includes(job.status)) renderSongs();
+    if(!pending) clearInterval(timer);
+  }, 800);
+}
+
+/* ================= process / re-render ================= */
+async function runJob(isRerender){
+  inA.pause(); pv.pause();
+  const m = mode==="stems" ? stemMode : mode;
+  if(!isRerender) lastRefs = mode==="speech" ? songRows().filter(r=>r.ref).map(r=>r.ref) : [];
+  const body = {mode:m, refs:lastRefs, nn_fallback:fallback, strength,
+                regions: regions.map(r=>({start:r.start, end:r.end, level:r.level}))};
+  try{ await api(`/api/job/${job.id}/process`,{json:body}); }
+  catch(err){ alert(err.message); return; }
+  const snapshot = JSON.stringify([strength, body.regions]);
+  rerendering = !!isRerender;
+  job.status = "queued"; job.mode = m;
+  if(!rerendering){ $("#p-bar").style.width="0"; $("#p-msg").textContent=tmsg("@queued"); $("#p-msg").classList.remove("err"); $("#p-pct").textContent=""; }
+  else { $("#rerender").disabled = true; $("#rr-msg").textContent = t("rerendering"); }
+  render();
+  const iv = setInterval(async ()=>{
+    let j; try{ j = await api(`/api/job/${job.id}`); }catch(e){ return; }
+    Object.assign(job, j); job.mode = m;
+    if(rerendering) $("#rr-msg").textContent = j.status==="running" ? `${t("rerendering")} ${Math.round(j.progress*100)}%` : t("rerendering");
+    else {
+      $("#p-msg").textContent = tmsg(j.message); $("#p-msg").classList.toggle("err", j.status==="error");
+      $("#p-pct").textContent = j.status==="running" ? Math.round(j.progress*100)+"%" : ""; $("#p-bar").style.width = (j.progress*100)+"%";
+    }
+    if(j.status==="done"){ clearInterval(iv); rendered = snapshot; const keepT = a0() ? a0().currentTime : 0; rerendering=false; showResult(keepT); }
+    if(j.status==="error"){ clearInterval(iv);
+      if(rerendering){ rerendering=false; job.status="done"; $("#rr-msg").textContent = tmsg(j.message); updateDirty(); }
+      else { job.status="uploaded_err"; render(); $("#s-prog").classList.remove("hidden"); } }
+  }, 500);
+}
+$("#start").onclick = () => runJob(false);
+$("#rerender").onclick = () => runJob(true);
+function updateDirty(){
+  const now = JSON.stringify([strength, regions.map(r=>({start:r.start, end:r.end, level:r.level}))]);
+  const dirty = rendered !== null && now !== rendered;
+  $("#rerender").disabled = !dirty || rerendering;
+  if(!rerendering && !$("#rr-msg").textContent.startsWith(t("err"))) $("#rr-msg").textContent = "";
+}
+
+/* ================= result ================= */
+let view = {s:0, e:1};            // visible time window (zoom)
+let lastLevel = (()=>{ try{ return localStorage.getItem("lastLevel") || "strong" }catch(e){ return "strong" } })();
+const dur = () => (job && job.duration) || 1;
+const fmtT = s => { s = Math.max(0, s||0); const m = Math.floor(s/60), r = s - m*60; return `${m}:${r.toFixed(1).padStart(4,"0")}`; };
+function setPlayIcon(playing){ $("#m-play").innerHTML = playing ? ICON.pause : ICON.play; $("#m-play").title = t(playing?"pause":"play"); }
+setPlayIcon(false);
+
+function stopPlayers(){ players.forEach(p=>{ p.a.pause(); p.a.removeAttribute("src"); }); players=[]; $("#tracks").innerHTML=""; setPlayIcon(false); }
+function showResult(keepT=0){
+  const keepView = players.length && view.e <= dur() + 0.01;
+  stopPlayers(); render();
+  if(!keepView) view = {s:0, e:dur()};
+  $("#t-dur").textContent = fmt(job.duration); $("#r-name").textContent = job.name;
+  renderReport();
+  const speech = job.mode==="speech";
+  for(const [i,o] of job.outputs.entries()){
+    const el = document.createElement("div"); el.className="trk";
+    el.innerHTML = `<div class="trk-head"><button class="tname"></button><div class="grow"></div>
+      <div class="menu-wrap"><button class="ib dl">${ICON.dl}</button></div></div>
+      <div class="trk-body"><canvas></canvas></div>`;
+    const nm = el.querySelector(".tname"); nm.textContent = t("stems")[o.key] || o.key; nm.title = t("only");
+    el.querySelector(".dl").title = t("save");
+    const a = new Audio(`/api/job/${job.id}/file/${o.key}.mp3?v=${job.version||0}`); a.preload="auto";
+    if(keepT) a.addEventListener("loadedmetadata", ()=>{ a.currentTime = keepT; }, {once:true});
+    const p = {o, a, el, body:el.querySelector(".trk-body"), cv:el.querySelector("canvas"), on: !speech || i===0, peaks:null};
+    players.push(p);
+    fetch(`/api/job/${job.id}/peaks/${o.key}?v=${job.version||0}`).then(r=>r.json()).then(pk=>{ p.peaks = pk; drawAll(); }).catch(()=>{});
+    nm.onclick = e => toggleTrack(p, e.ctrlKey || e.shiftKey);
+    el.querySelector(".dl").onclick = e => { e.stopPropagation(); openMenu(e.currentTarget.parentNode, ext => save(o.key, ext)); };
+    bindTrack(p);
+    $("#tracks").appendChild(el);
+  }
+  players[0].a.onended = () => { players.forEach(p=>p.a.pause()); setPlayIcon(false); };
+  if(speech){ if(rendered===null) rendered = JSON.stringify([strength, regions.map(r=>({start:r.start,end:r.end,level:r.level}))]);
+    segRegion.set(selReg ? selReg.level : strength, false); renderScope(); updateDirty(); }
+  updateHint(); mixUpdate();
+  requestAnimationFrame(()=>{ segRegion.place(false); drawAll(); });
+}
+function updateHint(){ $("#hint2").textContent = job && job.mode==="speech" ? t("hint_parts") : t("hint_zoom"); }
+// click a name: hear only this track; click the only active one again: hear all; ctrl/shift: add or remove
+function toggleTrack(p, add){
+  const active = players.filter(x=>x.on).length;
+  if(add) p.on = !(p.on && active > 1);
+  else if(p.on && active === 1) players.forEach(x=>x.on = true);
+  else players.forEach(x=>x.on = x===p);
+  mixUpdate();
+}
+const a0 = () => players[0] && players[0].a;
+function openMenu(wrap, cb){
+  closeMenus();
+  const m = document.createElement("div"); m.className="menu";
+  m.innerHTML = `<button data-e="wav">${t("wav")}</button><button data-e="mp3">MP3</button>`;
+  m.querySelectorAll("button").forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); closeMenus(); cb(b.dataset.e); });
+  wrap.appendChild(m);
+}
+const closeMenus = () => $$(".menu").forEach(m=>m.remove());
+document.addEventListener("click", closeMenus);
+async function save(key, ext){
+  if(desk()) await window.pywebview.api.save_stem(job.id, key, ext, lang);
+  else { const a=document.createElement("a"); a.href=`/api/job/${job.id}/file/${key}.${ext}?dl=1&lang=${lang}`; a.click(); }
+}
+$("#save-all").onclick = e => { e.stopPropagation(); openMenu($("#all-wrap"), async ext => {
+  if(desk()) await window.pywebview.api.save_all(job.id, ext, lang); else for(const o of job.outputs) await save(o.key, ext);
+}); };
+function mixUpdate(){
+  for(const p of players){ p.a.volume = p.on ? 1 : 0; p.el.querySelector(".tname").classList.toggle("on", p.on); }
+  drawAll();
+}
+
+/* waveform of one track inside the current zoom window: parts behind, playhead on top */
+function roundRect(c, x, y, w, h, r){
+  c.beginPath(); if(w <= 0) return; r = Math.min(r, w/2, h/2);
+  c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+}
+function drawTrack(p){
+  const cv = p.cv, dpr = devicePixelRatio||1, w = cv.clientWidth, h = cv.clientHeight;
+  if(!w) return;
+  cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  const c = cv.getContext("2d"); c.scale(dpr,dpr);
+  const css = getComputedStyle(document.documentElement);
+  const played = css.getPropertyValue("--accent").trim(), rest = css.getPropertyValue(p.on?"--wave":"--wave-dim").trim();
+  const pos = a0() ? a0().currentTime : 0, span = view.e - view.s;
+  if(p.peaks && p.peaks.length){
+    const P = p.peaks, pps = P.length / dur();
+    if(p.mx === undefined){ let mx = 0.02; for(const v of P) if(v>mx) mx=v; p.mx = mx; }
+    const step = 3, bars = Math.floor(w/step);
+    for(let i=0;i<bars;i++){
+      const t0 = view.s + i*step/w*span, t1 = view.s + (i+1)*step/w*span;
+      const a = Math.max(0, Math.floor(t0*pps)), b = Math.min(P.length, Math.max(a+1, Math.ceil(t1*pps)));
+      let v=0; for(let k=a;k<b;k++) if(P[k]>v) v=P[k];
+      const bh = Math.max(2, Math.round((v/p.mx)*(h-18)));
+      c.fillStyle = p.on && t1 <= pos ? played : rest;
+      c.fillRect(i*step, Math.round((h-bh)/2), 2, bh);
+    }
+  }
+  if(job.mode==="speech") for(const r of regions){
+    const x0 = (r.start-view.s)/span*w, x1 = (r.end-view.s)/span*w;
+    if(x1 < 0 || x0 > w) continue;
+    const col = lvColor(r.level), sel = r===selReg;
+    c.fillStyle = col + (sel ? "33" : "22"); roundRect(c, x0, 6, x1-x0, h-12, 10); c.fill();
+    c.strokeStyle = sel ? "#ffffffd9" : col + "b3"; c.lineWidth = sel ? 2 : 1.5;
+    roundRect(c, x0+1, 7, x1-x0-2, h-14, 9); c.stroke();
+  }
+  if(job.mode==="speech") for(const r of regions){        // labels on top of the waveform
+    const x0 = (r.start-view.s)/span*w, x1 = (r.end-view.s)/span*w;
+    if(x1-x0 > 64 && x1 > 0 && x0 < w){ c.fillStyle = lvColor(r.level); c.font = "600 11px 'Segoe UI', sans-serif"; c.fillText(t(r.level), Math.max(x0, 0)+10, 22); }
+  }
+  const px = (pos-view.s)/span*w;
+  if(px >= 0 && px <= w){ c.fillStyle = "#ffffffd0"; c.fillRect(Math.round(px), 0, 1.5, h); }
+}
+function drawAll(){
+  if(!players.length) return;
+  players.forEach(drawTrack);
+  $("#t-cur").textContent = fmtT(a0().currentTime);
+}
+function seek(t_){ players.forEach(p=>p.a.currentTime=t_); drawAll(); }
+function play(){ const t_=a0().currentTime; players.forEach(p=>{ p.a.currentTime=t_; p.a.play(); }); setPlayIcon(true); tick(); }
+function pause(){ players.forEach(p=>p.a.pause()); setPlayIcon(false); drawAll(); }
+function seekPlay(t_){ seek(Math.max(0, Math.min(dur()-0.05, t_))); if(a0().paused) play(); }
+$("#m-play").onclick = () => { const m=a0(); if(!m) return; m.paused ? play() : pause(); };
+function tick(){
+  const m=a0(); if(!m || m.paused) return;
+  for(const p of players.slice(1)) if(Math.abs(p.a.currentTime-m.currentTime)>0.06) p.a.currentTime=m.currentTime;
+  // when zoomed in, turn the page as the playhead runs off the right edge (but never yank the view
+  // away from where the user scrolled to look)
+  const span = view.e-view.s, cur = m.currentTime;
+  if(span < dur()-0.01 && !drag && tick.prev !== undefined && tick.prev <= view.e && cur > view.e){
+    view.s = Math.max(0, Math.min(dur()-span, cur - span*0.05)); view.e = view.s+span; }
+  tick.prev = cur;
+  drawAll(); requestAnimationFrame(tick);
+}
+document.addEventListener("keydown", e=>{
+  if(window.SaturniDebug && (SaturniDebug.owns(e) || SaturniDebug.active)) return;
+  if(e.target.tagName==="INPUT" || !job || job.status!=="done") return;
+  if(e.code==="Space"){ e.preventDefault(); $("#m-play").click(); }
+  if((e.key==="Delete" || e.key==="Backspace") && selReg) deleteRegion(selReg);
+  if(e.key==="Escape" && selReg) selectRegion(null);
+});
+function renderReport(){
+  const box=$("#report"), rep=job.report;
+  if(!rep){ box.classList.add("hidden"); return; }
+  const lines = [];
+  for(const r of Object.values(rep.refs||{})){
+    const n = mergeSegs(r.segments).length;
+    const how = r.segments.every(s=>s.spectral) ? t("how_spec") : r.segments.some(s=>s.spectral) ? t("how_mix") : t("how_exact");
+    if(n) lines.push(`<div><span class="dot"></span><span><b>${esc(r.title)}</b> — ${how}, ${t("parts_n", n)}</span></div>`);
+  }
+  for(const u of rep.unknown||[]) lines.push(`<div><span class="dot warn"></span><span>${t("unknown", fmt(u[0]), fmt(u[1]))}</span></div>`);
+  box.innerHTML = lines.join(""); box.classList.toggle("hidden", !lines.length);
+}
+
+/* ================= zoom: wheel over the tracks ================= */
+$("#tracks").addEventListener("wheel", e=>{
+  if(!job || !players.length) return;
+  e.preventDefault();
+  const body = e.target.closest(".trk-body") || players[0].body, rect = body.getBoundingClientRect();
+  const span = view.e - view.s;
+  if(e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)){
+    const d = (e.shiftKey ? e.deltaY : e.deltaX) / rect.width * span;
+    view.s = Math.max(0, Math.min(dur()-span, view.s + d)); view.e = view.s + span;
+  } else {
+    const fx = Math.max(0, Math.min(1, (e.clientX-rect.left)/rect.width)), at = view.s + fx*span;
+    const ns = Math.max(Math.min(1.5, dur()), Math.min(dur(), span*Math.exp(e.deltaY*0.0018)));
+    view.s = Math.max(0, Math.min(dur()-ns, at - fx*ns)); view.e = view.s + ns;
+  }
+  drawAll();
+}, {passive:false});
+
+/* ================= parts: marked right on the tracks ================= */
+function renderScope(){
+  const s = $("#scope");
+  if(selReg){
+    s.innerHTML = `<span class="sw-dot" style="background:${lvColor(selReg.level)}"></span><span class="ell">${t("part", fmt(selReg.start), fmt(selReg.end))}</span>
+      <button class="x" title="${t("del_part")}">${ICON.x}</button>`;
+    s.querySelector(".x").onclick = () => deleteRegion(selReg);
+  } else s.innerHTML = `<span class="sw-dot" style="background:${lvColor(strength)}"></span><span>${t("whole")}</span>`;
+}
+function selectRegion(r){ selReg = r; segRegion.set(r ? r.level : strength, true); renderScope(); drawAll(); }
+function deleteRegion(r){ regions = regions.filter(x=>x!==r); if(selReg===r) selReg=null; selectRegion(selReg); updateDirty(); }
+function drawLane(){ drawAll(); }
+function hitRegion(p, x){
+  const w = p.body.clientWidth, span = view.e-view.s, tt = view.s + x/w*span, edge = 9/w*span;
+  for(const r of [...regions].reverse()){
+    if(Math.abs(tt-r.start) <= edge) return {r, kind:"l"};
+    if(Math.abs(tt-r.end) <= edge) return {r, kind:"r"};
+    if(tt > r.start && tt < r.end) return {r, kind:"move"};
+  }
+  return null;
+}
+let drag = null;
+function bindTrack(p){
+  const body = p.body;
+  const relX = e => e.clientX - body.getBoundingClientRect().left;
+  const toT = e => view.s + Math.max(0, Math.min(1, relX(e)/body.clientWidth))*(view.e-view.s);
+  body.addEventListener("contextmenu", e=>e.preventDefault());
+  body.addEventListener("pointerdown", e=>{
+    if(e.button===2){
+      body.setPointerCapture(e.pointerId); body.classList.add("panning");
+      drag = {p, pan:true, cx:e.clientX, vs:view.s}; return;
+    }
+    if(e.button!==0) return;
+    body.setPointerCapture(e.pointerId);
+    const h = job.mode==="speech" ? hitRegion(p, relX(e)) : null;
+    drag = {p, x0:toT(e), cx:e.clientX, moved:false, kind: h ? h.kind : "new", r: h ? h.r : null, s0: h ? h.r.start : 0, e0: h ? h.r.end : 0};
+  });
+  body.addEventListener("pointermove", e=>{
+    if(!drag){
+      const h = job.mode==="speech" ? hitRegion(p, relX(e)) : null;
+      body.style.cursor = !h ? (job.mode==="speech" ? "text" : "pointer") : h.kind==="move" ? "grab" : "ew-resize";
+      return;
+    }
+    if(drag.p!==p) return;
+    if(drag.pan){
+      const span = view.e-view.s;
+      view.s = Math.max(0, Math.min(dur()-span, drag.vs - (e.clientX-drag.cx)/body.clientWidth*span)); view.e = view.s+span;
+      drawAll(); return;
+    }
+    if(!drag.moved && Math.abs(e.clientX-drag.cx) < 4) return;
+    drag.moved = true;
+    if(job.mode!=="speech") return;
+    const x = toT(e), d = x - drag.x0, D = dur();
+    if(drag.kind==="new"){
+      if(!drag.r){ drag.r = {start:drag.x0, end:drag.x0, level:lastLevel}; regions.push(drag.r); selReg = drag.r; segRegion.set(lastLevel, true); }
+      drag.r.start = Math.min(drag.x0, x); drag.r.end = Math.max(drag.x0, x);
+    } else {
+      if(selReg!==drag.r){ selReg = drag.r; segRegion.set(drag.r.level, true); }
+      if(drag.kind==="move"){ const len = drag.e0-drag.s0, st = Math.min(D-len, Math.max(0, drag.s0+d)); drag.r.start = st; drag.r.end = st+len; }
+      else if(drag.kind==="l") drag.r.start = Math.min(drag.r.end-0.2, Math.max(0, drag.s0+d));
+      else drag.r.end = Math.max(drag.r.start+0.2, Math.min(D, drag.e0+d));
+    }
+    renderScope(); drawAll();
+  });
+  body.addEventListener("pointerup", ()=>{
+    if(!drag || drag.p!==p) return;
+    const d = drag; drag = null;
+    if(d.pan){ body.classList.remove("panning"); return; }
+    if(!d.moved){
+      // a click anywhere starts playback from there; clicking a part also selects it
+      if(job.mode==="speech" && (d.r || selReg)) selectRegion(d.r || null);
+      seekPlay(d.x0);
+    } else if(d.r && d.r.end - d.r.start < 0.2) deleteRegion(d.r);
+    renderScope(); drawAll(); updateDirty();
+  });
+}
+
+window.addEventListener("resize", ()=>{
+  segStrength.place(false); segStems.place(false); segRegion.place(false);
+  if(!job) return; if(job.status==="done") drawAll(); else drawWave($("#in-wave"), job.peaks, inA.currentTime/(job.duration||1));
+});
+applyLang();
+/* ================= Saturni · Debug (Ctrl+click the gear) ================= */
+window.__emit = evs => { for (const e of evs) if (window.SaturniDebug) SaturniDebug.handle(e.type, e.data); };
+addEventListener("pywebviewready", () => { if (window.SaturniDebug) SaturniDebug.init({ api: (n, ...a) => window.pywebview.api[n](...a),
+  app: "Saturni · Audio Cleaner", context: () => mode, gear: "#gear" }); });
+</script>
+<script src="/mod/debug/debug.js"></script>
+</body>
+</html>

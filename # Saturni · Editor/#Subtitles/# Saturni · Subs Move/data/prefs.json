@@ -1,0 +1,35 @@
+{
+ "theme": "dark",
+ "ui": "minimal",
+ "accent": "blue",
+ "last_file": "D:\\# Video\\#Поляна\\Мусор\\1.srt",
+ "placement": {
+  "rect": [
+   139,
+   78,
+   1623,
+   959
+  ],
+  "max": false
+ },
+ "presets": [
+  {
+   "id": "p-dark",
+   "name": "Dark",
+   "mk": "[]",
+   "icon": "moon"
+  },
+  {
+   "id": "p-light",
+   "name": "Light",
+   "mk": "[w]!",
+   "icon": "sun"
+  },
+  {
+   "id": "p-flat",
+   "name": "Flat",
+   "mk": "#0",
+   "icon": "square"
+  }
+ ]
+}

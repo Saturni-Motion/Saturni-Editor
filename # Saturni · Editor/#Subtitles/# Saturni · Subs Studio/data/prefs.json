@@ -1,0 +1,39 @@
+{
+ "theme": "dark",
+ "last_file": "D:\\# Video\\#Поляна\\Каменская\\Серия 1\\11 ` 1h.srt",
+ "placement": {
+  "rect": [
+   0,
+   0,
+   1924,
+   1055
+  ],
+  "max": true
+ },
+ "model": "opus",
+ "effort": null,
+ "claude_exe": null,
+ "list_w": 1019,
+ "video_h": null,
+ "tl_h": 270,
+ "zoom": 150,
+ "colors": {
+  "wave": "#6a94c8"
+ },
+ "settings": {
+  "holdButton": 3,
+  "magnetPx": 10,
+  "bridgeMs": 200,
+  "seekOnSelect": true,
+  "followPlayback": true,
+  "listFont": 13.5,
+  "caretAtEnd": false,
+  "waveStyle": "solid",
+  "waveBar": 3,
+  "waveGap": 2,
+  "waveRound": true,
+  "waveSeg": 3,
+  "waveSegGap": 1,
+  "tlSingleSelect": false
+ }
+}

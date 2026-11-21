@@ -1,0 +1,12 @@
+{
+ "theme": "dark",
+ "log": false,
+ "colors": {
+  "dark": {
+   "Background": "#151617",
+   "Sidebar": "#1A1B1E",
+   "Divider": "#1F2023"
+  },
+  "light": {}
+ }
+}

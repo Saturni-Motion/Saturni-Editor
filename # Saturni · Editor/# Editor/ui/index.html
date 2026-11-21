@@ -1,0 +1,98 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Saturni · Editor</title>
+<link rel="stylesheet" href="/mod/debug/debug.css"><script src="/mod/debug/debug.js"></script>
+<link rel="stylesheet" href="/ui/app.css">
+</head><body>
+<svg width="0" height="0" style="position:absolute"><filter id="sharp" color-interpolation-filters="sRGB"><feConvolveMatrix id="sharpk" order="3" kernelMatrix="0 0 0 0 1 0 0 0 0" preserveAlpha="true"/></filter></svg>
+<div id="top"><div id="info"><span id="name">Loading…</span><span id="meta"></span></div>
+  <div id="tools"><span id="msg"></span>
+    <span class="seg mv" id="modesw"><button data-m="simple" class="on">Simple</button><button data-m="pro">Advanced</button></span>
+    <button id="addb" class="ic av" data-i="add" title="Add media"></button>
+    <span class="sep mv"></span>
+    <button id="zfit" class="ic pv" data-i="fit" title="Fit the picture"></button>
+    <button id="cropreset" class="ic pv" data-i="reset" title="Reset crop"></button>
+    <span class="sep pv"></span>
+    <button id="adjb" class="ic pv" data-i="effects" title="Effects"></button>
+    <button id="setb" class="ic" data-i="gear" title="Settings"></button></div></div>
+<div id="stage" class="blk"><div id="view"><img id="pic" draggable="false" style="display:none"><canvas id="glc"></canvas></div>
+  <div id="black"></div>
+  <div id="crop"><div id="vig"></div><i class="g" style="left:33.33%;top:0;bottom:0;width:1px"></i><i class="g" style="left:66.66%;top:0;bottom:0;width:1px"></i>
+    <i class="g" style="top:33.33%;left:0;right:0;height:1px"></i><i class="g" style="top:66.66%;left:0;right:0;height:1px"></i>
+    <i class="k" style="left:0;top:0;border-right:0;border-bottom:0"></i><i class="k" style="right:0;top:0;border-left:0;border-bottom:0"></i>
+    <i class="k" style="left:0;bottom:0;border-right:0;border-top:0"></i><i class="k" style="right:0;bottom:0;border-left:0;border-top:0"></i></div>
+  <span id="vsize"></span><div id="vmsg">Preparing preview…</div><div id="ratios"></div></div>
+<button id="addcol" data-i="add" title="Add media"></button>
+<div id="tlrow"><div id="tl" class="blk"><canvas id="tlc"></canvas><button id="del" data-i="trash" data-t="Delete"></button></div><canvas id="meter"></canvas></div>
+<div id="over"><canvas id="overc"></canvas><input class="ot" id="st" spellcheck="false" title="Start"><input class="ot" id="en" spellcheck="false" title="End"></div>
+<div class="row">
+  <span class="l tv">
+    <button id="razor" class="ic" data-i="scissors" title="Cut  C"></button>
+    <button id="trash" class="ic" data-i="trash" title="Delete  Del"></button>
+    <button id="sndb" class="ic" data-i="sound" title="Sound Effects"></button>
+    <span class="seg vo" id="pmode"><button data-m="fast" title="The playhead and every cut go only to keyframes: saving doesn't re-render the video">Fast</button><button data-m="frames" title="The playhead and every cut go to whole frames">Frames</button><button data-m="precise" title="The playhead and every cut go anywhere">Precise</button></span>
+  </span>
+  <span class="m tv">
+    <button id="undo" class="ic" data-i="undo" title="Undo  Ctrl+Z"></button>
+    <button id="redo" class="ic" data-i="redo" title="Redo  Ctrl+Shift+Z"></button>
+    <button id="prev" class="ic" data-i="prev" title="Back  ←"></button><button id="play" class="ic" data-i="play" title="Play  Space"></button><button id="next" class="ic" data-i="next" title="Forward  →"></button>
+    <button id="loop" class="ic" data-i="loop" title="Loop  L"></button><button id="fit" class="ic" data-i="fit" title="Fit the timeline  F"></button>
+  </span>
+  <span class="r"><span class="seg vo" id="pq"><button data-q="1" title="Preview at full quality">Full</button><button data-q="2" title="Preview at half size: effects run 4 times lighter">1/2</button><button data-q="4" title="Preview at quarter size: effects run 16 times lighter">1/4</button></span>
+    <span class="split" id="splitsv"><button id="savemenu" class="ic" data-i="chevron" title="Save as new, Output"></button><button id="save" class="primary">Save</button></span>
+    <button id="cancel">Cancel</button>
+    <button id="mix1" title="One sound track: mix all the tracks into one when saving"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="6"/><path d="M10.9 8.6 12.5 7.4v5.2"/><path d="M3.6 5.6a8 8 0 0 0 0 8.8"/><path d="M20.4 5.6a8 8 0 0 1 0 8.8"/></svg></button></span>
+</div>
+
+<div class="menu" id="smenu"></div>
+<div class="menu" id="ctx"></div>
+<div class="card blk" id="adjust"><h3>Effects<button id="adjreset">Reset</button></h3><div id="adjlist" style="display:flex;flex-direction:column;gap:6px"></div></div>
+<div class="card" id="sound"><h3>Sound Effects <small id="sndtarget"></small><button id="sndreset">Reset</button></h3><div id="sndlist" style="display:flex;flex-direction:column;gap:6px"></div></div>
+
+<div id="veil"></div>
+<div class="card mid" id="settings"><h3>Settings</h3>
+  <div class="list"><div id="clist"></div>
+    <div class="cap">Saving</div>
+    <label class="ck crow"><input type="checkbox" id="o_over"><span>Always overwrite the original (otherwise it goes to the @ folder)</span></label>
+    <div class="crow"><span>JPEG / WebP quality (empty = same as the original)</span><input class="fld" id="o_pq" type="number" min="50" max="100" placeholder="auto" style="width:64px;text-align:right"></div>
+    <div class="cap">Start with</div>
+    <div class="crow"><span>Playhead (video)</span><select class="fld" id="o_mode"><option value="fast">Fast</option><option value="frames">Frames</option><option value="precise">Precise</option></select></div>
+    <div class="crow"><span>Preview quality (video)</span><select class="fld" id="o_prev"><option value="1">Full</option><option value="2">1/2</option><option value="4">1/4</option></select></div>
+    <label class="ck crow"><input type="checkbox" id="o_loop"><span>Loop on</span></label>
+    <div class="cap">Level meter</div>
+    <div class="crow"><span>Lowest level shown, dB</span><input class="fld" id="o_mmin" type="number" min="-120" max="-6" style="width:64px;text-align:right"></div>
+    <div class="crow"><span>Highest level shown, dB</span><input class="fld" id="o_mmax" type="number" min="-54" max="24" style="width:64px;text-align:right"></div></div>
+  <div class="btns"><button class="grow" id="s_def">Reset to defaults</button><button id="s_cancel">Cancel</button><button class="primary" id="s_save">Save</button></div></div>
+
+<div class="card mid" id="saveas"><h3>Save as new</h3>
+  <div class="nm"><input id="sa_name" spellcheck="false"><span id="sa_ext"></span></div>
+  <div class="chips" id="sa_names"></div>
+  <div id="sawarn"></div>
+  <div class="orow" id="sa_proprow"><label class="ck"><input type="checkbox" id="sa_keep" checked><span>Keep properties from</span></label><select class="fld" id="sa_props"></select></div>
+  <label class="ck" id="sa_keep1"><input type="checkbox" id="sa_keepone" checked>Keep the file's properties</label>
+  <label class="ck"><input type="checkbox" id="sa_del"><span id="sa_dellbl">Move the original to the Recycle Bin</span></label>
+  <div class="orow" id="sa_outrow"><span id="sa_out"></span><button id="sa_outb" style="padding:3px 8px;font-size:12px">Change</button></div>
+  <div class="btns"><button id="sa_cancel">Cancel</button><button class="primary" id="sa_ok">Save</button></div></div>
+
+<div class="card mid" id="outc"><h3>Output</h3>
+  <div class="orow"><span>Frame rate</span><select class="fld" id="o_fps"></select></div>
+  <div class="orow"><span>Bitrate</span><label class="ck"><input type="checkbox" id="o_brorig" checked><span id="o_brlbl">Original</span></label>
+    <input class="fld" id="o_mbps" type="number" min="0.2" max="200" step="0.1" style="width:64px;text-align:right">Mbps</div>
+  <div class="btns"><button class="primary" id="o_ok">Done</button></div></div>
+<script src="/ui/kit/base.js"></script>
+<script src="/ui/kit/icons.js"></script>
+<script src="/ui/kit/seg.js"></script>
+<script src="/ui/timeline/model.js"></script>
+<script src="/ui/timeline/draw.js"></script>
+<script src="/ui/playback/meter.js"></script>
+<script src="/ui/timeline/edit.js"></script>
+<script src="/ui/playback/playback.js"></script>
+<script src="/ui/timeline/mouse.js"></script>
+<script src="/ui/kit/menu.js"></script>
+<script src="/ui/picture/picture.js"></script>
+<script src="/ui/kit/layout.js"></script>
+<script src="/ui/panels/panels.js"></script>
+<script src="/ui/picture/gl.js"></script>
+<script src="/ui/settings/settings.js"></script>
+<script src="/ui/save/save.js"></script>
+<script src="/ui/save/project.js"></script>
+<script src="/ui/main.js"></script>
+</body></html>

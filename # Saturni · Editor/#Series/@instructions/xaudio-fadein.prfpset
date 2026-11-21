@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PremiereData Version="3">
+	<Tree ObjectRef="1"/>
+	<Tree ObjectID="1" ClassID="177f2841-dd5b-43bd-9d9a-79e231bd47dd" Version="1">
+		<Node Version="1">
+		</Node>
+		<RootBin ObjectRef="2"/>
+	</Tree>
+	<BinTreeItem ObjectID="2" ClassID="5e0f46fa-384f-4c09-bc53-0b8e2b7005b5" Version="4">
+		<TreeItemBase Version="4">
+			<Name>Root</Name>
+			<Node Version="1">
+			</Node>
+			<Locked>false</Locked>
+		</TreeItemBase>
+		<Items Version="1">
+			<Item Index="0" ObjectRef="3"/>
+		</Items>
+		<Expanded>false</Expanded>
+		<Sorted>false</Sorted>
+	</BinTreeItem>
+	<BinTreeItem ObjectID="3" ClassID="5e0f46fa-384f-4c09-bc53-0b8e2b7005b5" Version="4">
+		<TreeItemBase Version="4">
+			<Name>Presets</Name>
+			<Node Version="1">
+				<Properties Version="1">
+					<HandlerEffects.EffectItemTree.PresetsBin>1</HandlerEffects.EffectItemTree.PresetsBin>
+				</Properties>
+			</Node>
+			<Data ObjectRef="4"/>
+			<Locked>false</Locked>
+		</TreeItemBase>
+		<Items Version="1">
+			<Item Index="0" ObjectRef="5"/>
+		</Items>
+		<Expanded>true</Expanded>
+		<Sorted>true</Sorted>
+	</BinTreeItem>
+	<EffectBinItem ObjectID="4" ClassID="5f513d71-0018-4405-a10b-bf5597f99960" Version="1">
+		<Flavor>1</Flavor>
+	</EffectBinItem>
+	<TreeItem ObjectID="5" ClassID="025f59ac-1f29-42c0-9897-ada1059bd547" Version="3">
+		<TreeItemBase Version="4">
+			<Name>audio-fadein</Name>
+			<Node Version="1">
+				<Properties Version="1">
+					<MZ.EffectPresets.PresetUID>dc662a53-767b-4dad-a234-46993489da4c</MZ.EffectPresets.PresetUID>
+				</Properties>
+			</Node>
+			<Data ObjectRef="6"/>
+			<Locked>false</Locked>
+		</TreeItemBase>
+	</TreeItem>
+	<FilterPresetItem ObjectID="6" ClassID="e56c9ba0-91cb-4f21-9174-c1b52448c6c9" Version="2">
+		<FilterPresets Version="1">
+			<FilterPreset Index="0" ObjectRef="7"/>
+			<FilterPreset Index="1" ObjectRef="11"/>
+			<FilterPreset Index="2" ObjectRef="15"/>
+		</FilterPresets>
+		<EffectItem Version="1">
+			<EffectFlavor>0</EffectFlavor>
+			<EffectIsShorcut>false</EffectIsShorcut>
+		</EffectItem>
+	</FilterPresetItem>
+	<FilterPreset ObjectID="7" ClassID="ee52a7d2-069e-47f7-aa30-e3e3286b65a3" Version="3">
+		<Component ObjectRef="8"/>
+		<MediaType>80b8e3d5-6dca-4195-aefb-cb5f407ab009</MediaType>
+		<Node Version="1">
+		</Node>
+		<Description></Description>
+		<Type>1</Type>
+		<FilterMatchName>Internal Volume Stereo</FilterMatchName>
+		<AnchorInPoint>449445749759988</AnchorInPoint>
+		<AnchorOutPoint>449512809983997</AnchorOutPoint>
+		<Speed>1.099999999999999866773237</Speed>
+		<TransitionDuration>0</TransitionDuration>
+	</FilterPreset>
+	<AudioFilterComponent ObjectID="8" ClassID="d77a90a0-6c9e-44bf-9b20-de8c21168fe1" Version="4">
+		<FilterPreset>0</FilterPreset>
+		<FilterMatchName>Internal Volume Stereo</FilterMatchName>
+		<FilterIndex>-1</FilterIndex>
+		<ChannelConfigData>{"in":[{"layout":[100,101],"name":"Stereo In","type":0}],"out":[{"layout":[100,101],"name":"Stereo Out","type":0}]}</ChannelConfigData>
+		<AudioComponent Version="3">
+			<FrameRate>5292000</FrameRate>
+			<AudioChannelLayout>[{"channellabel":100},{"channellabel":101}]</AudioChannelLayout>
+			<Component Version="7">
+				<Node Version="1">
+				</Node>
+				<DisplayName>Volume</DisplayName>
+				<Params Version="1">
+					<Param Index="0" ObjectRef="9"/>
+					<Param Index="1" ObjectRef="10"/>
+				</Params>
+				<Intrinsic>true</Intrinsic>
+				<InstanceName>audio-fadein</InstanceName>
+			</Component>
+			<ChannelType>1</ChannelType>
+			<AudioComponentType>0</AudioComponentType>
+		</AudioComponent>
+	</AudioFilterComponent>
+	<AudioComponentParam ObjectID="9" ClassID="32657501-3aa4-445f-a49b-d09ecb9fa1ae" Version="10">
+		<Name>Mute</Name>
+		<Node Version="1">
+		</Node>
+		<Keyframes></Keyframes>
+		<Timestamp>214828810482600</Timestamp>
+		<IsTimeVarying>false</IsTimeVarying>
+		<StartKeyframe>-91445760000000000,false,0,0,0,0,0,0</StartKeyframe>
+		<RangeLocked>false</RangeLocked>
+		<UnitsString></UnitsString>
+	</AudioComponentParam>
+	<AudioComponentParam ObjectID="10" ClassID="a714635e-a628-4b27-9d59-77eba47dbc1a" Version="10">
+		<Name>Level</Name>
+		<Node Version="1">
+		</Node>
+		<Keyframes>449445749759988,0.00562341325,0,0,0,0.16666666666666666,0.65228987175710174,0.16666666666666666;449512809983987,0.177827939391,0,0,0.65228987175710174,0.16666666666666666,0,0.16666666666666666;</Keyframes>
+		<Timestamp>214800348499400</Timestamp>
+		<StartKeyframe>-91445760000000000,0.177827939391,0,0,0,0,0,0</StartKeyframe>
+		<CurrentValue>0.005623413716</CurrentValue>
+		<UnitsString>dB</UnitsString>
+	</AudioComponentParam>
+	<FilterPreset ObjectID="11" ClassID="ee52a7d2-069e-47f7-aa30-e3e3286b65a3" Version="3">
+		<Component ObjectRef="12"/>
+		<MediaType>80b8e3d5-6dca-4195-aefb-cb5f407ab009</MediaType>
+		<Node Version="1">
+		</Node>
+		<Description></Description>
+		<Type>1</Type>
+		<FilterMatchName>Internal Volume</FilterMatchName>
+		<AnchorInPoint>449445749759988</AnchorInPoint>
+		<AnchorOutPoint>449512809983997</AnchorOutPoint>
+		<Speed>1.099999999999999866773237</Speed>
+		<TransitionDuration>0</TransitionDuration>
+	</FilterPreset>
+	<AudioFilterComponent ObjectID="12" ClassID="d77a90a0-6c9e-44bf-9b20-de8c21168fe1" Version="4">
+		<FilterPreset>0</FilterPreset>
+		<FilterMatchName>Internal Volume</FilterMatchName>
+		<FilterIndex>-1</FilterIndex>
+		<OpaqueData Encoding="base64" Checksum="1999709216">PD94bWwgdmVyc2lvbj0nMS4wJz8+Cjxwcm9wLm1hcCB2ZXJzaW9uPSc0Jz4KPHByb3AubGlzdD4KPHByb3AucGFpcj4KPGtleT5GYWN0b3J5UHJlc2V0PC9rZXk+Cjx1c3RyaW5nPihEZWZhdWx0KTwvdXN0cmluZz4KPC9wcm9wLnBhaXI+Cjxwcm9wLnBhaXI+CjxrZXk+VHlwZTwva2V5Pgo8aW50IHR5cGU9J3NpZ25lZCcgc2l6ZT0nMzInPjI8L2ludD4KPC9wcm9wLnBhaXI+Cjxwcm9wLnBhaXI+CjxrZXk+VmVyc2lvbjwva2V5Pgo8ZmxvYXQ+MTwvZmxvYXQ+CjwvcHJvcC5wYWlyPgo8L3Byb3AubGlzdD4KPC9wcm9wLm1hcD4K</OpaqueData>
+		<ChannelConfigData>{"in":[{"layout":[0],"name":"Mono In","type":0}],"out":[{"layout":[0],"name":"Mono Out","type":0}]}</ChannelConfigData>
+		<AudioComponent Version="3">
+			<FrameRate>5292000</FrameRate>
+			<AudioChannelLayout>[{"channellabel":0}]</AudioChannelLayout>
+			<Component Version="7">
+				<Node Version="1">
+				</Node>
+				<DisplayName>Volume</DisplayName>
+				<Params Version="1">
+					<Param Index="0" ObjectRef="13"/>
+					<Param Index="1" ObjectRef="14"/>
+				</Params>
+				<InstanceName></InstanceName>
+			</Component>
+			<ChannelType>0</ChannelType>
+			<AudioComponentType>0</AudioComponentType>
+		</AudioComponent>
+	</AudioFilterComponent>
+	<AudioComponentParam ObjectID="13" ClassID="32657501-3aa4-445f-a49b-d09ecb9fa1ae" Version="10">
+		<Name>Mute</Name>
+		<Node Version="1">
+		</Node>
+		<Keyframes></Keyframes>
+		<Timestamp>214828810806700</Timestamp>
+		<IsTimeVarying>false</IsTimeVarying>
+		<StartKeyframe>-91445760000000000,false,0,0,0,0,0,0</StartKeyframe>
+		<RangeLocked>false</RangeLocked>
+		<UnitsString></UnitsString>
+	</AudioComponentParam>
+	<AudioComponentParam ObjectID="14" ClassID="a714635e-a628-4b27-9d59-77eba47dbc1a" Version="10">
+		<Name>Level</Name>
+		<Node Version="1">
+		</Node>
+		<Keyframes>449445749759988,0.00562341325,0,0,0,0.16666666666666666,0.65228987175710174,0.16666666666666666;449512809983987,0.177827939391,0,0,0.65228987175710174,0.16666666666666666,0,0.16666666666666666;</Keyframes>
+		<Timestamp>214800348499400</Timestamp>
+		<StartKeyframe>-91445760000000000,0.177827939391,0,0,0,0,0,0</StartKeyframe>
+		<CurrentValue>0.177827939391</CurrentValue>
+		<UnitsString>dB</UnitsString>
+	</AudioComponentParam>
+	<FilterPreset ObjectID="15" ClassID="ee52a7d2-069e-47f7-aa30-e3e3286b65a3" Version="3">
+		<Component ObjectRef="16"/>
+		<MediaType>80b8e3d5-6dca-4195-aefb-cb5f407ab009</MediaType>
+		<Node Version="1">
+		</Node>
+		<Description></Description>
+		<Type>1</Type>
+		<FilterMatchName>Internal Volume</FilterMatchName>
+		<AnchorInPoint>449445749759988</AnchorInPoint>
+		<AnchorOutPoint>449512809983997</AnchorOutPoint>
+		<Speed>1.099999999999999866773237</Speed>
+		<TransitionDuration>0</TransitionDuration>
+	</FilterPreset>
+	<AudioFilterComponent ObjectID="16" ClassID="d77a90a0-6c9e-44bf-9b20-de8c21168fe1" Version="4">
+		<FilterPreset>0</FilterPreset>
+		<FilterMatchName>Internal Volume</FilterMatchName>
+		<FilterIndex>-1</FilterIndex>
+		<OpaqueData Encoding="base64" Checksum="1999709216">PD94bWwgdmVyc2lvbj0nMS4wJz8+Cjxwcm9wLm1hcCB2ZXJzaW9uPSc0Jz4KPHByb3AubGlzdD4KPHByb3AucGFpcj4KPGtleT5GYWN0b3J5UHJlc2V0PC9rZXk+Cjx1c3RyaW5nPihEZWZhdWx0KTwvdXN0cmluZz4KPC9wcm9wLnBhaXI+Cjxwcm9wLnBhaXI+CjxrZXk+VHlwZTwva2V5Pgo8aW50IHR5cGU9J3NpZ25lZCcgc2l6ZT0nMzInPjI8L2ludD4KPC9wcm9wLnBhaXI+Cjxwcm9wLnBhaXI+CjxrZXk+VmVyc2lvbjwva2V5Pgo8ZmxvYXQ+MTwvZmxvYXQ+CjwvcHJvcC5wYWlyPgo8L3Byb3AubGlzdD4KPC9wcm9wLm1hcD4K</OpaqueData>
+		<ChannelConfigData>{"in":[{"layout":[100,101,102,103,104,105],"name":"Surround 5.1 In","type":0}],"out":[{"layout":[100,101,102,103,104,105],"name":"Surround 5.1 Out","type":0}]}</ChannelConfigData>
+		<AudioComponent Version="3">
+			<FrameRate>5292000</FrameRate>
+			<AudioChannelLayout>[{"channellabel":100},{"channellabel":101},{"channellabel":102},{"channellabel":103},{"channellabel":104},{"channellabel":105}]</AudioChannelLayout>
+			<Component Version="7">
+				<Node Version="1">
+				</Node>
+				<DisplayName>Volume</DisplayName>
+				<Params Version="1">
+					<Param Index="0" ObjectRef="17"/>
+					<Param Index="1" ObjectRef="18"/>
+				</Params>
+				<InstanceName></InstanceName>
+			</Component>
+			<ChannelType>2</ChannelType>
+			<AudioComponentType>0</AudioComponentType>
+		</AudioComponent>
+	</AudioFilterComponent>
+	<AudioComponentParam ObjectID="17" ClassID="32657501-3aa4-445f-a49b-d09ecb9fa1ae" Version="10">
+		<Name>Mute</Name>
+		<Node Version="1">
+		</Node>
+		<Keyframes></Keyframes>
+		<Timestamp>214828811181100</Timestamp>
+		<IsTimeVarying>false</IsTimeVarying>
+		<StartKeyframe>-91445760000000000,false,0,0,0,0,0,0</StartKeyframe>
+		<RangeLocked>false</RangeLocked>
+		<UnitsString></UnitsString>
+	</AudioComponentParam>
+	<AudioComponentParam ObjectID="18" ClassID="a714635e-a628-4b27-9d59-77eba47dbc1a" Version="10">
+		<Name>Level</Name>
+		<Node Version="1">
+		</Node>
+		<Keyframes>449445749759988,0.00562341325,0,0,0,0.16666666666666666,0.65228987175710174,0.16666666666666666;449512809983987,0.177827939391,0,0,0.65228987175710174,0.16666666666666666,0,0.16666666666666666;</Keyframes>
+		<Timestamp>214800348499400</Timestamp>
+		<StartKeyframe>-91445760000000000,0.177827939391,0,0,0,0,0,0</StartKeyframe>
+		<CurrentValue>0.177827939391</CurrentValue>
+		<UnitsString>dB</UnitsString>
+	</AudioComponentParam>
+</PremiereData>

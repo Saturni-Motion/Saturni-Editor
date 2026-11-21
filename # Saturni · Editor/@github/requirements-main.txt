@@ -1,0 +1,24 @@
+# Основной Python 3.12 (Editor, Subs, Motion Tracker, скрипты #Series).
+# torch/torchaudio/torchvision ставятся отдельно из колеса CUDA — см. install.ps1.
+numpy
+scipy
+pillow
+opencv-contrib-python
+pywebview==6.2.1
+pythonnet
+psutil
+PyYAML
+PyQt6
+scenedetect
+soundfile
+yt-dlp
+pymorphy3
+pymorphy3-dicts-ru
+faster-whisper
+whisperx==3.8.6
+ultralytics
+onnxruntime
+demucs
+fastapi
+uvicorn
+pydantic

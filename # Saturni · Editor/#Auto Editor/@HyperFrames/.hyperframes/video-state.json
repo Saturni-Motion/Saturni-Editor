@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "historyId": "0149f7b2-8cc8-4016-837f-b58a5fc85096",
+  "currentRevision": null,
+  "pendingChanges": false,
+  "files": {
+    "AGENTS.md": {
+      "hash": "1a68041fc901ff835682a2a8d6f63c96dbb0b9eef8fb0971e97a79eaf69303d3",
+      "content": "C:\\Users\\SATURNi\\.cache\\hyperframes\\history\\0149f7b2-8cc8-4016-837f-b58a5fc85096\\blobs\\1a\\1a68041fc901ff835682a2a8d6f63c96dbb0b9eef8fb0971e97a79eaf69303d3"
+    },
+    "CLAUDE.md": {
+      "hash": "1a68041fc901ff835682a2a8d6f63c96dbb0b9eef8fb0971e97a79eaf69303d3",
+      "content": "C:\\Users\\SATURNi\\.cache\\hyperframes\\history\\0149f7b2-8cc8-4016-837f-b58a5fc85096\\blobs\\1a\\1a68041fc901ff835682a2a8d6f63c96dbb0b9eef8fb0971e97a79eaf69303d3"
+    },
+    "hyperframes.json": {
+      "hash": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50",
+      "content": "C:\\Users\\SATURNi\\.cache\\hyperframes\\history\\0149f7b2-8cc8-4016-837f-b58a5fc85096\\blobs\\53\\53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+    },
+    "index.html": {
+      "hash": "bb26a8f483c4b8ed34f95e1a3fd8bd97e06440351dcb1c24c71d2abdbb1a1d15",
+      "content": "C:\\Users\\SATURNi\\.cache\\hyperframes\\history\\0149f7b2-8cc8-4016-837f-b58a5fc85096\\blobs\\bb\\bb26a8f483c4b8ed34f95e1a3fd8bd97e06440351dcb1c24c71d2abdbb1a1d15"
+    },
+    "meta.json": {
+      "hash": "615fee506e944ea33257ce12ce88b6710f57703e13d54d9a3faa1f5c058f9668",
+      "content": "C:\\Users\\SATURNi\\.cache\\hyperframes\\history\\0149f7b2-8cc8-4016-837f-b58a5fc85096\\blobs\\61\\615fee506e944ea33257ce12ce88b6710f57703e13d54d9a3faa1f5c058f9668"
+    },
+    "package.json": {
+      "hash": "3ecbecc042d145bd813968734e157e73152976f06f62d92096bf27ba9ad57e99",
+      "content": "C:\\Users\\SATURNi\\.cache\\hyperframes\\history\\0149f7b2-8cc8-4016-837f-b58a5fc85096\\blobs\\3e\\3ecbecc042d145bd813968734e157e73152976f06f62d92096bf27ba9ad57e99"
+    }
+  },
+  "revisions": {},
+  "checks": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "snapshots": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "renders": {
+    "latest": {
+      "id": "791ccb9d-d2c8-41a7-9337-180dc3b0dba6",
+      "completedAt": 1793826033052,
+      "output": "D:\\@Hub\\# Saturni · Editor\\#Auto Editor\\@HyperFrames\\renders\\@HyperFrames_2026-11-05_01-59-56.mp4",
+      "status": "completed",
+      "revision": null
+    },
+    "retainedRevisions": []
+  },
+  "pendingArtifactCleanup": []
+}

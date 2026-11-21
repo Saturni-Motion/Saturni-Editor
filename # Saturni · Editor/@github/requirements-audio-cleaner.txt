@@ -1,0 +1,17 @@
+# Отдельное окружение Audio Cleaner: %USERPROFILE%\.stemstudio\venv (Python 3.12).
+# torch==2.6.0 / torchaudio==2.6.0 (cu124) ставятся отдельно — см. install.ps1.
+numpy
+scipy
+soundfile
+librosa
+einops
+ml_collections
+demucs==4.1.0
+pywebview==6.2.1
+fastapi
+uvicorn
+pydantic
+shazamio
+yt-dlp
+tqdm
+torchmetrics

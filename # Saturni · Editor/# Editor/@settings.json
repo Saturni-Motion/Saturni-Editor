@@ -1,0 +1,41 @@
+{
+ "colors": {
+  "bg": "#141415",
+  "panel": "#0f0f10",
+  "text": "#e9eaec",
+  "accent": "#007bff",
+  "stage": "#000000",
+  "timeline": "#0f0f10",
+  "ruler": "#7c7f86",
+  "playhead": "#3d9bff",
+  "keep": "#e0fff2",
+  "removed": "#45474c",
+  "cut": "#ff976b",
+  "selection": "#3d9bff",
+  "trim": "#e0ffec",
+  "volume": "#ffffff",
+  "fade": "#c2f0ff",
+  "grid": "#ffffff",
+  "clip": "#5b8def",
+  "meterLow": "#d1fff4",
+  "meterMid": "#c2ffc3",
+  "meterHigh": "#feffad",
+  "overview": "#3d9bff",
+  "overviewBg": "#1a1b1f",
+  "overviewView": "#7cc8ff"
+ },
+ "options": {
+  "photoQuality": 0,
+  "playMode": "fast",
+  "preview": 1,
+  "loop": false,
+  "meterMin": -60,
+  "meterMax": 6,
+  "overwrite": false
+ },
+ "state": {
+  "recent": [
+   "D:\\# Video\\#Поляна\\Каменская\\Серия 2\\4 ` 1h.mp4"
+  ]
+ }
+}

@@ -1,0 +1,19 @@
+# Вторая страховка: sync.ps1 это и так не копирует
+node_modules/
+__pycache__/
+*.pyc
+webview/
+sessions/
+cache/
+⿻/@debug/
+*.wav
+*.mp3
+*.mp4
+*.mov
+*.mkv
+*.dmp
+*.log
+.mcp.json
+.env
+desktop.ini
+Thumbs.db
