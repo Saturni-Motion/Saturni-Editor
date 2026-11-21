@@ -38,6 +38,10 @@ Sync-Dir (Join-Path $Hub '@ Saturni · Voice') (Join-Path $Repo '@ Saturni · Vo
 $SB = Join-Path $Repo '@ Saturni · Status Bar'
 New-Item -ItemType Directory -Force $SB | Out-Null
 Copy-Item -LiteralPath (Join-Path $Hub '@ Saturni · Status Bar\@StatusBar.py'), (Join-Path $Hub '@ Saturni · Status Bar\@links.md') -Destination $SB -Force
+# Ролики и звук конца рендера (победа / проигрыш) — Status Bar без них не покажет анимацию; кэш *.bake_*.mov пересоздаётся сам
+foreach ($n in '# W delivery.mp4', '# W delivery.mp3', '# L delivery.mp4', '# L delivery.mp3') {
+    Copy-Item -LiteralPath (Join-Path $Hub "@ Saturni · Status Bar\$n") -Destination $SB -Force
+}
 # Общие правила Saturni для Claude
 Sync-Dir (Join-Path $Hub '⿻\@ Claude\@ INSTRUCTIONS') (Join-Path $Repo '⿻\@ Claude\@ INSTRUCTIONS')
 

@@ -15,5 +15,7 @@ cache/
 *.log
 .mcp.json
 .env
+!/@ Saturni · Status Bar/*delivery.mp4
+!/@ Saturni · Status Bar/*delivery.mp3
 desktop.ini
 Thumbs.db
