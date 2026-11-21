@@ -22,7 +22,7 @@ winget install -e --id Git.Git
 ```
 
 ```powershell
-git clone https://github.com/<аккаунт>/Saturni-Editor.git "D:\@Hub"
+git clone https://github.com/Saturni-Motion/Saturni-Editor.git "D:\@Hub"
 ```
 
 Если `D:\@Hub` уже есть и не пустая — скачать в другую папку и перенести содержимое внутрь `D:\@Hub`.
